@@ -2,7 +2,7 @@
 
 Thanks for your interest in contributing.
 
-This repository contains a Stylelint plugin template focused on Docusaurus styling conventions and future Docusaurus-specific CSS rules.
+This repository contains a Stylelint plugin for CSS performance budget rules, including selector, rendering, paint, and motion checks.
 
 ## Prerequisites
 

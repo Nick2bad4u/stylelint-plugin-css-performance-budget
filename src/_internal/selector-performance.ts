@@ -64,6 +64,22 @@ export function getSelectorListLength(selectorList: string): number {
     }
 }
 
+/** Return true when any selector in a list targets a broad global scope. */
+export function selectorListContainsBroadGlobalSelector(
+    selectorList: string
+): boolean {
+    try {
+        // eslint-disable-next-line n/no-sync -- postcss-selector-parser provides sync AST APIs only.
+        const ast = selectorParser().astSync(selectorList);
+
+        return ast.nodes.some(
+            (node) => node.type === "selector" && isBroadGlobalSelector(node)
+        );
+    } catch {
+        return false;
+    }
+}
+
 function calculateSelectorComplexity(selectorNode: Readonly<Selector>): number {
     let complexity = 0;
 
@@ -110,4 +126,40 @@ function getNodeWeight(node: Readonly<Node>): number {
             return 0;
         }
     }
+}
+
+function isBroadGlobalNode(node: Readonly<Node>): boolean {
+    if (node.type === "universal") {
+        return true;
+    }
+
+    if (node.type === "tag") {
+        return node.value === "body" || node.value === "html";
+    }
+
+    return node.type === "pseudo" && node.value === ":root";
+}
+
+function isBroadGlobalSelector(selectorNode: Readonly<Selector>): boolean {
+    let hasBroadGlobalNode = false;
+    let hasNarrowingNode = false;
+
+    selectorNode.walk((node) => {
+        if (isBroadGlobalNode(node)) {
+            hasBroadGlobalNode = true;
+            return;
+        }
+
+        if (isNarrowingSelectorNode(node)) {
+            hasNarrowingNode = true;
+        }
+    });
+
+    return hasBroadGlobalNode && !hasNarrowingNode;
+}
+
+function isNarrowingSelectorNode(node: Readonly<Node>): boolean {
+    return (
+        node.type === "attribute" || node.type === "class" || node.type === "id"
+    );
 }

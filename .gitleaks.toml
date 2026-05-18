@@ -1,8 +1,7 @@
-# Gitleaks Configuration for Uptime Watcher - 2025 Enhanced Security
+# Gitleaks Configuration for stylelint-plugin-css-performance-budget - 2025 Enhanced Security
 # Modern configuration following Gitleaks v8.28+ best practices with latest rules
 # See: https://github.com/gitleaks/gitleaks/blob/master/config/gitleaks.toml
-"$schema" = "https://raw.githubusercontent.com/Nick2bad4u/Uptime-Watcher/refs/heads/main/config/schemas/generic.schema.json"
-title     = "Uptime Watcher - Enhanced Secret Detection Configuration"
+title     = "stylelint-plugin-css-performance-budget - Enhanced Secret Detection Configuration"
 
 # Extend the default Gitleaks configuration with modern v8.28+ rules
 # The default configuration includes comprehensive patterns for:

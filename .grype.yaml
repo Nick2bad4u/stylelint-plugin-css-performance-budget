@@ -224,7 +224,7 @@ match:
 
 match-upstream-kernel-headers: false
 
-name: "Uptime-Watcher"
+name: "stylelint-plugin-css-performance-budget"
 
 only-fixed: false # show only vulnerabilities with available fixes
 only-notfixed: false # show only vulnerabilities without fixes

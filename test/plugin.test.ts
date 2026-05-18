@@ -45,8 +45,11 @@ describe("plugin surface", () => {
         ).toStrictEqual({
             "css-performance-budget/no-excessive-filter-effects": true,
             "css-performance-budget/no-expensive-animation-properties": true,
+            "css-performance-budget/no-fixed-background-attachment": true,
+            "css-performance-budget/no-global-expensive-effects": true,
             "css-performance-budget/no-layout-thrashing-properties": true,
             "css-performance-budget/no-paint-heavy-declarations": true,
+            "css-performance-budget/no-render-blocking-import": true,
             "css-performance-budget/no-will-change-abuse": true,
         });
 
@@ -55,11 +58,17 @@ describe("plugin surface", () => {
         ).toStrictEqual({
             "css-performance-budget/no-excessive-filter-effects": true,
             "css-performance-budget/no-expensive-animation-properties": true,
+            "css-performance-budget/no-expensive-positioning-patterns": true,
+            "css-performance-budget/no-fixed-background-attachment": true,
             "css-performance-budget/no-giant-selector-lists": true,
+            "css-performance-budget/no-global-expensive-effects": true,
             "css-performance-budget/no-heavy-selectors": true,
             "css-performance-budget/no-layout-thrashing-properties": true,
+            "css-performance-budget/no-oversized-css-custom-property-values": true,
             "css-performance-budget/no-paint-heavy-declarations": true,
+            "css-performance-budget/no-render-blocking-import": true,
             "css-performance-budget/no-will-change-abuse": true,
+            "css-performance-budget/require-reduced-motion-for-expensive-animations": true,
         });
 
         expect(

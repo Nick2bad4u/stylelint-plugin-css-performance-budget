@@ -92,6 +92,106 @@ describe("css-performance-budget rules", () => {
         );
     });
 
+    it("reports render-blocking css imports", async () => {
+        expect.hasAssertions();
+        const result = await lintWithConfig({
+            code: '@import url("theme.css");\n.button { color: red; }',
+            config: {
+                rules: {
+                    "css-performance-budget/no-render-blocking-import": true,
+                },
+            },
+        });
+
+        expect(getWarningTexts(result).join("\n")).toContain(
+            "css-performance-budget/no-render-blocking-import"
+        );
+    });
+
+    it("reports fixed background attachment", async () => {
+        expect.hasAssertions();
+        const result = await lintWithConfig({
+            code: ".hero { background: url(hero.jpg) center / cover fixed; }",
+            config: {
+                rules: {
+                    "css-performance-budget/no-fixed-background-attachment": true,
+                },
+            },
+        });
+
+        expect(getWarningTexts(result).join("\n")).toContain(
+            "css-performance-budget/no-fixed-background-attachment"
+        );
+    });
+
+    it("reports global expensive effects", async () => {
+        expect.hasAssertions();
+        const result = await lintWithConfig({
+            code: "body { filter: blur(2px); }",
+            config: {
+                rules: {
+                    "css-performance-budget/no-global-expensive-effects": true,
+                },
+            },
+        });
+
+        expect(getWarningTexts(result).join("\n")).toContain(
+            "css-performance-budget/no-global-expensive-effects"
+        );
+    });
+
+    it("reports oversized rendering custom properties", async () => {
+        expect.hasAssertions();
+        const result = await lintWithConfig({
+            code: [
+                ":root {",
+                "  --hero-shadow: 0 1px 2px black, 0 2px 4px black, 0 4px 8px black, 0 8px 16px black, 0 16px 32px black;",
+                "}",
+            ].join("\n"),
+            config: {
+                rules: {
+                    "css-performance-budget/no-oversized-css-custom-property-values": true,
+                },
+            },
+        });
+
+        expect(getWarningTexts(result).join("\n")).toContain(
+            "css-performance-budget/no-oversized-css-custom-property-values"
+        );
+    });
+
+    it("reports expensive positioning patterns", async () => {
+        expect.hasAssertions();
+        const result = await lintWithConfig({
+            code: ".toolbar { position: sticky; top: 0; box-shadow: 0 8px 24px rgb(0 0 0 / 20%); }",
+            config: {
+                rules: {
+                    "css-performance-budget/no-expensive-positioning-patterns": true,
+                },
+            },
+        });
+
+        expect(getWarningTexts(result).join("\n")).toContain(
+            "css-performance-budget/no-expensive-positioning-patterns"
+        );
+    });
+
+    it("reports expensive motion without reduced-motion override", async () => {
+        expect.hasAssertions();
+        const result = await lintWithConfig({
+            code: ".drawer { transition: width 220ms ease; }",
+            config: {
+                rules: {
+                    "css-performance-budget/require-reduced-motion-for-expensive-animations": true,
+                },
+            },
+        });
+
+        expect(getWarningTexts(result).join("\n")).toContain(
+            "css-performance-budget/require-reduced-motion-for-expensive-animations"
+        );
+    });
+
     it("allows scoped low-cost animation targets", async () => {
         expect.hasAssertions();
         const result = await lintWithConfig({
@@ -121,6 +221,27 @@ describe("css-performance-budget rules", () => {
 
         expect(getWarningTexts(result)).not.toContain(
             "css-performance-budget/no-will-change-abuse"
+        );
+    });
+
+    it("allows expensive motion with reduced-motion override", async () => {
+        expect.hasAssertions();
+        const result = await lintWithConfig({
+            code: [
+                ".drawer { transition: width 220ms ease; }",
+                "@media (prefers-reduced-motion: reduce) {",
+                "  .drawer { transition-duration: 0ms; }",
+                "}",
+            ].join("\n"),
+            config: {
+                rules: {
+                    "css-performance-budget/require-reduced-motion-for-expensive-animations": true,
+                },
+            },
+        });
+
+        expect(getWarningTexts(result)).not.toContain(
+            "css-performance-budget/require-reduced-motion-for-expensive-animations"
         );
     });
 

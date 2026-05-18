@@ -36,7 +36,7 @@
             "pattern": "^#.*$"
         },
         {
-            "pattern": "^https://raw.githubusercontent.com/nick2bad4u/Uptime-Watcher/metrics/"
+            "pattern": "^https://raw.githubusercontent.com/nick2bad4u/stylelint-plugin-css-performance-budget/metrics/"
         },
         {
             "pattern": "^https://localhost"
@@ -48,7 +48,7 @@
             "pattern": "^file://"
         }
     ],
-    "projectBaseUrl": "https://nick2bad4u.github.io/Uptime-Watcher/",
+    "projectBaseUrl": "https://nick2bad4u.github.io/stylelint-plugin-css-performance-budget/",
     "replacementPatterns": [],
     "retryCount": 3,
     "retryOn429": true,

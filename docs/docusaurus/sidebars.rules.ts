@@ -72,8 +72,28 @@ const sidebars = {
                     type: "doc",
                 },
                 {
+                    id: "no-expensive-positioning-patterns",
+                    label: "no-expensive-positioning-patterns",
+                    type: "doc",
+                },
+                {
+                    id: "no-fixed-background-attachment",
+                    label: "no-fixed-background-attachment",
+                    type: "doc",
+                },
+                {
+                    id: "no-global-expensive-effects",
+                    label: "no-global-expensive-effects",
+                    type: "doc",
+                },
+                {
                     id: "no-layout-thrashing-properties",
                     label: "no-layout-thrashing-properties",
+                    type: "doc",
+                },
+                {
+                    id: "no-oversized-css-custom-property-values",
+                    label: "no-oversized-css-custom-property-values",
                     type: "doc",
                 },
                 {
@@ -82,8 +102,18 @@ const sidebars = {
                     type: "doc",
                 },
                 {
+                    id: "no-render-blocking-import",
+                    label: "no-render-blocking-import",
+                    type: "doc",
+                },
+                {
                     id: "no-will-change-abuse",
                     label: "no-will-change-abuse",
+                    type: "doc",
+                },
+                {
+                    id: "require-reduced-motion-for-expensive-animations",
+                    label: "require-reduced-motion-for-expensive-animations",
                     type: "doc",
                 },
             ],

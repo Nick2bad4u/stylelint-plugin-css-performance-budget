@@ -13,6 +13,46 @@ export type CssFunctionCall = Readonly<{
 
 const pxPerRem = 16;
 
+/** Return true when a value contains a top-level CSS token outside functions. */
+export function containsTopLevelToken(value: string, token: string): boolean {
+    const wantedToken = token.toLowerCase();
+    let tokenStart = -1;
+    let parenthesisDepth = 0;
+
+    for (let index = 0; index <= value.length; index += 1) {
+        const character = value[index];
+
+        if (character === "(") {
+            parenthesisDepth += 1;
+        } else if (character === ")") {
+            parenthesisDepth = Math.max(0, parenthesisDepth - 1);
+        }
+
+        if (
+            parenthesisDepth > 0 ||
+            isTokenDelimiter(character) ||
+            index === value.length
+        ) {
+            if (tokenStart !== -1) {
+                const currentToken = value
+                    .slice(tokenStart, index)
+                    .trim()
+                    .toLowerCase();
+
+                if (currentToken === wantedToken) {
+                    return true;
+                }
+
+                tokenStart = -1;
+            }
+        } else if (tokenStart === -1) {
+            tokenStart = index;
+        }
+    }
+
+    return false;
+}
+
 /** Extract blur radii (in px) from `blur()` and `drop-shadow()` functions. */
 export function extractBlurRadiiPx(value: string): readonly number[] {
     const functions = parseCssFunctionCalls(value);
