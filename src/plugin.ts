@@ -1,7 +1,6 @@
 /**
  * @packageDocumentation
- * Public plugin entrypoint for `stylelint-plugin-docusaurus` exports and
- * shareable config wiring.
+ * Public plugin entrypoint for `stylelint-plugin-css-performance-budget`.
  */
 import type { Config, Plugin as StylelintPlugin } from "stylelint";
 
@@ -11,50 +10,49 @@ import type { StylelintPluginRuleContract } from "./_internal/create-stylelint-r
 
 import {
     CONFIG_NAMES as configNamesValue,
-    type DocusaurusConfigName as InternalDocusaurusConfigName,
+    type PerformanceBudgetConfigName as InternalPerformanceBudgetConfigName,
     PACKAGE_NAME as packageNameValue,
     PACKAGE_VERSION as packageVersionValue,
     PLUGIN_NAMESPACE as pluginNamespaceValue,
 } from "./_internal/plugin-constants.js";
-import { docusaurusRules as docusaurusRulesValue } from "./_internal/rules-registry.js";
+import { performanceBudgetRules as performanceBudgetRulesValue } from "./_internal/rules-registry.js";
 
-/** Public shareable config map exported by this package. */
-export type DocusaurusConfigMap = Record<
-    DocusaurusConfigName,
-    DocusaurusShareableConfig
+/** Map of exported shareable configuration names to concrete config objects. */
+export type PerformanceBudgetConfigMap = Record<
+    PerformanceBudgetConfigName,
+    PerformanceBudgetShareableConfig
 >;
-/** Shareable config names exposed by this package. */
-export type DocusaurusConfigName = InternalDocusaurusConfigName;
-/** Public fully-qualified rule ids supported by this package. */
-export type DocusaurusRuleId = `${typeof pluginNamespaceValue}/${string}`;
-
-/** Public unqualified rule names supported by this package. */
-export type DocusaurusRuleName = Extract<
-    keyof typeof docusaurusRulesValue,
+/** Literal union of supported shareable configuration names. */
+export type PerformanceBudgetConfigName = InternalPerformanceBudgetConfigName;
+/** Fully-qualified Stylelint rule ID in this plugin namespace. */
+export type PerformanceBudgetRuleId =
+    `${typeof pluginNamespaceValue}/${string}`;
+/** Public rule registry key names. */
+export type PerformanceBudgetRuleName = Extract<
+    keyof typeof performanceBudgetRulesValue,
     string
 >;
-
-/** Shareable config shape exported by this package. */
-export type DocusaurusShareableConfig = Config & {
+/** Concrete shareable Stylelint config shape exported by this package. */
+export type PerformanceBudgetShareableConfig = Config & {
     plugins: (string | StylelintPlugin)[];
     rules: NonNullable<Config["rules"]>;
 };
 
-/** Internal ordered registry entry tuple. */
-type DocusaurusRuleEntry = readonly [string, StylelintPluginRuleContract];
-/** Internal runtime rule registry shape. */
-type DocusaurusRulesMap = Readonly<Record<string, StylelintPluginRuleContract>>;
+type PerformanceBudgetRuleEntry = readonly [
+    string,
+    StylelintPluginRuleContract,
+];
+type PerformanceBudgetRulesMap = Readonly<
+    Record<string, StylelintPluginRuleContract>
+>;
 
-/** Local package metadata values used to avoid import re-export warnings. */
 const packageMetaName = packageNameValue;
 const packageMetaNamespace = pluginNamespaceValue;
 const packageMetaVersion = packageVersionValue;
-/** Local rule registry alias used to avoid import re-export warnings. */
-const runtimeRules = docusaurusRulesValue;
-/** Local config-name alias used to avoid import re-export warnings. */
+const runtimeRules = performanceBudgetRulesValue;
 const publicConfigNames = configNamesValue;
 
-/** Public package metadata exported alongside the plugin pack. */
+/** Package metadata exposed by the plugin entrypoint. */
 export const meta: Readonly<{
     name: string;
     namespace: string;
@@ -65,56 +63,47 @@ export const meta: Readonly<{
     version: packageMetaVersion,
 };
 
-/** Public rule registry keyed by unqualified rule name. */
-export const rules: DocusaurusRulesMap = runtimeRules;
+/** Canonical rules registry keyed by short rule name. */
+export const rules: PerformanceBudgetRulesMap = runtimeRules;
 
-/** Stable ordered unqualified rule names. */
+/** Sorted list of short rule names exported by this plugin. */
 export const ruleNames: readonly string[] = objectKeys(rules).toSorted(
     (left, right) => left.localeCompare(right)
 );
 
-/** Stable ordered registry entries used to derive configs and ids. */
-const docusaurusRuleEntries: readonly DocusaurusRuleEntry[] = (() => {
-    const entries: DocusaurusRuleEntry[] = [];
+const performanceBudgetRuleEntries: readonly PerformanceBudgetRuleEntry[] =
+    (() => {
+        const entries: PerformanceBudgetRuleEntry[] = [];
 
-    for (const ruleName of ruleNames) {
-        const rule = rules[ruleName];
+        for (const ruleName of ruleNames) {
+            const rule = rules[ruleName];
 
-        if (!isDefined(rule)) {
-            continue;
+            if (isDefined(rule)) {
+                entries.push([ruleName, rule]);
+            }
         }
 
-        entries.push([ruleName, rule]);
-    }
+        return entries;
+    })();
 
-    return entries;
-})();
+/** Runtime plugin objects consumed by Stylelint's `plugins` array. */
+export const plugins: readonly StylelintPlugin[] =
+    performanceBudgetRuleEntries.map(([, rule]) => rule);
 
-/** Default plugin-pack export consumed by Stylelint. */
-export const plugins: readonly StylelintPlugin[] = docusaurusRuleEntries.map(
-    ([, rule]) => rule
-);
+/** Fully-qualified rule IDs exported by this package. */
+export const ruleIds: readonly PerformanceBudgetRuleId[] =
+    performanceBudgetRuleEntries.map(
+        ([, rule]) => rule.ruleName as PerformanceBudgetRuleId
+    );
 
-/** Stable ordered fully qualified rule ids. */
-export const ruleIds: readonly DocusaurusRuleId[] = docusaurusRuleEntries.map(
-    ([, rule]) => rule.ruleName as DocusaurusRuleId
-);
+const recommendedRuleIds: readonly PerformanceBudgetRuleId[] =
+    performanceBudgetRuleEntries
+        .filter(([, rule]) => rule.docs.recommended)
+        .map(([, rule]) => rule.ruleName as PerformanceBudgetRuleId);
 
-/** Rule ids included in the recommended shareable config. */
-const recommendedRuleIds: readonly DocusaurusRuleId[] = docusaurusRuleEntries
-    .filter(([, rule]) => rule.docs.recommended)
-    .map(([, rule]) => rule.ruleName as DocusaurusRuleId);
-
-/**
- * Build one shareable Stylelint config.
- *
- * @param enabledRuleIds - Rule ids to enable in the config.
- *
- * @returns Shareable Stylelint config.
- */
 function createConfig(
-    enabledRuleIds: readonly DocusaurusRuleId[]
-): DocusaurusShareableConfig {
+    enabledRuleIds: readonly PerformanceBudgetRuleId[]
+): PerformanceBudgetShareableConfig {
     return {
         plugins: [...plugins],
         rules: (() => {
@@ -129,15 +118,15 @@ function createConfig(
     };
 }
 
-/** Shareable config exports exposed by the package. */
-export const docusaurusPluginConfigs: DocusaurusConfigMap = {
-    "docusaurus-all": createConfig(ruleIds),
-    "docusaurus-docs-safe": createConfig(recommendedRuleIds),
-    "docusaurus-recommended": createConfig(recommendedRuleIds),
+/** Shareable configurations exposed by this package. */
+export const performanceBudgetPluginConfigs: PerformanceBudgetConfigMap = {
+    "performance-budget-all": createConfig(ruleIds),
+    "performance-budget-recommended": createConfig(recommendedRuleIds),
+    "performance-budget-strict": createConfig(ruleIds),
 };
 
-/** Stable ordered shareable config names. */
-export const configNames: readonly DocusaurusConfigName[] = publicConfigNames;
+/** Public list of supported shareable config names. */
+export const configNames: readonly PerformanceBudgetConfigName[] =
+    publicConfigNames;
 
-/** Default export consumed by Stylelint when the package is used as a plugin. */
 export default plugins;

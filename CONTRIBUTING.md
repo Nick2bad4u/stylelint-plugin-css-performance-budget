@@ -1,4 +1,4 @@
-# Contributing to stylelint-plugin-docusaurus
+# Contributing to stylelint-plugin-css-performance-budget
 
 Thanks for your interest in contributing.
 
@@ -98,3 +98,4 @@ Use the process described in [SECURITY.md](./SECURITY.md).
 
 By contributing, you agree your contributions are licensed under the
 [MIT License](./LICENSE).
+

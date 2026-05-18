@@ -63,7 +63,7 @@ applyTo: "test/**, tests/**"
           ...configs.recommended,
           rules: {
             ...configs.recommended.rules,
-            'docusaurus/my-rule': true,
+            'css-performance-budget/my-rule': true,
           },
         },
       });
@@ -124,7 +124,7 @@ import { describe, expect, it } from 'vitest';
 import plugin, { configs } from '../src/plugin';
 import { lintWithConfig } from './_internal/stylelint-test-helpers';
 
-describe('docusaurus/my-rule', () => {
+describe('css-performance-budget/my-rule', () => {
   it('reports invalid CSS', async () => {
     const result = await lintWithConfig({
       code: '.DocSearch-Button { color: red; }',
@@ -133,7 +133,7 @@ describe('docusaurus/my-rule', () => {
         plugins: [...plugin],
         rules: {
           ...configs.recommended.rules,
-          'docusaurus/my-rule': true,
+          'css-performance-budget/my-rule': true,
         },
       },
     });
@@ -161,3 +161,4 @@ test('selector helper handles arbitrary inputs', () => {
 
   </examples>
 </instructions>
+

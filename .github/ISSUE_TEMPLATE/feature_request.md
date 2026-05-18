@@ -1,6 +1,6 @@
 ---
 name: Feature request
-about: Suggest a new rule or improvement for stylelint-plugin-docusaurus
+about: Suggest a new rule or improvement for stylelint-plugin-css-performance-budget
 title: "Feature: "
 labels:
     - enhancement
@@ -44,3 +44,4 @@ assignees: []
 - [ ] Safe autofix behavior defined (or report-only behavior justified)
 - [ ] Test coverage plan (valid/invalid/edge/fixer)
 - [ ] Documentation impact identified (`docs/rules/<rule-id>.md` if rule-related)
+

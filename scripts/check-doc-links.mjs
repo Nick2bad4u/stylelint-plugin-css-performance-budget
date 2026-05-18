@@ -117,10 +117,7 @@ const IGNORED_DIRECTORIES = new Set([
     ".stryker-tmp",
 ]);
 
-// Capture Markdown links like [text](url) and images ![alt](url).
-// NOTE: this intentionally stays lightweight for MDX-heavy docs, so the
-// surrounding helpers strip code spans/blocks and normalize destinations.
-const LINK_PATTERN = /!?\[[^\]]*]\(([^)]+)\)/g;
+// Capture raw HTML anchors used in MDX/markdown prose.
 const HTML_ANCHOR_HREF_PATTERN =
     /<a\b[^>]*\bhref\s*=\s*(?:"([^"]+)"|'([^']+)'|([^\s"'=<>`]+))/giu;
 
@@ -232,7 +229,7 @@ export function stripMarkdownCode(markdown) {
  * @returns {readonly RegExpMatchArray[]}
  */
 export function extractMarkdownLinkMatches(content) {
-    return Array.from(stripMarkdownCode(content).matchAll(LINK_PATTERN));
+    return extractMarkdownLinks(stripMarkdownCode(content));
 }
 
 /**
@@ -247,6 +244,81 @@ export function extractHtmlAnchorLinks(content) {
         stripMarkdownCode(content).matchAll(HTML_ANCHOR_HREF_PATTERN),
         (match) => match[1] ?? match[2] ?? match[3] ?? ""
     ).filter((link) => link.length > 0);
+}
+
+/**
+ * @typedef {{
+ *     fullMatch: string;
+ *     isImage: boolean;
+ *     link: string;
+ * }} MarkdownLinkMatch
+ */
+
+/**
+ * Extract markdown inline links and images from prose without regex
+ * backtracking hotspots.
+ *
+ * @param {string} content
+ *
+ * @returns {readonly MarkdownLinkMatch[]}
+ */
+function extractMarkdownLinks(content) {
+    /** @type {MarkdownLinkMatch[]} */
+    const matches = [];
+    let index = 0;
+
+    while (index < content.length) {
+        const isImage = content[index] === "!" && content[index + 1] === "[";
+        const labelStart = isImage ? index + 1 : index;
+
+        if (content[labelStart] !== "[") {
+            index += 1;
+            continue;
+        }
+
+        const labelEnd = content.indexOf("]", labelStart + 1);
+
+        if (labelEnd === -1 || content[labelEnd + 1] !== "(") {
+            index += 1;
+            continue;
+        }
+
+        let depth = 1;
+        let urlEnd = -1;
+
+        for (let cursor = labelEnd + 2; cursor < content.length; cursor += 1) {
+            const character = content[cursor];
+
+            if (character === "(") {
+                depth += 1;
+            } else if (character === ")") {
+                depth -= 1;
+
+                if (depth === 0) {
+                    urlEnd = cursor;
+                    break;
+                }
+            }
+        }
+
+        if (urlEnd === -1) {
+            index += 1;
+            continue;
+        }
+
+        const matchStart = isImage ? index : labelStart;
+        const fullMatch = content.slice(matchStart, urlEnd + 1);
+        const link = content.slice(labelEnd + 2, urlEnd);
+
+        matches.push({
+            fullMatch,
+            isImage,
+            link,
+        });
+        index = urlEnd + 1;
+    }
+
+    return matches;
 }
 
 /**
@@ -482,7 +554,7 @@ async function checkFile(markdownPath, issues, issueSet, metrics) {
 
     const content = await readFile(markdownPath, "utf8");
     const strippedContent = stripMarkdownCode(content);
-    const matches = Array.from(strippedContent.matchAll(LINK_PATTERN));
+    const matches = extractMarkdownLinks(strippedContent);
     const htmlAnchorLinks = Array.from(
         strippedContent.matchAll(HTML_ANCHOR_HREF_PATTERN),
         (match) => match[1] ?? match[2] ?? match[3] ?? ""
@@ -495,16 +567,14 @@ async function checkFile(markdownPath, issues, issueSet, metrics) {
     }
 
     for (const match of matches) {
-        const fullMatch = match[0];
-        const link = match[1];
-        if (fullMatch.startsWith("!")) {
+        if (match.isImage) {
             metrics.imageLinksIgnored++;
             continue;
         }
-        if (link) {
+        if (match.link.length > 0) {
             const broken = await validateLink(
                 markdownPath,
-                link,
+                match.link,
                 issues,
                 issueSet,
                 metrics

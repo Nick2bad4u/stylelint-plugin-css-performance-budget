@@ -1,54 +1,34 @@
 ---
 title: Getting Started
-description: Install and use stylelint-plugin-docusaurus in an ESM Stylelint config.
+description: Install and use stylelint-plugin-css-performance-budget in an ESM Stylelint config.
 ---
 
 # Getting Started
 
-## Installation
+## Install
 
-```sh
-npm install --save-dev stylelint stylelint-plugin-docusaurus
+```bash
+npm install --save-dev stylelint stylelint-plugin-css-performance-budget
 ```
 
-## Quick start with a shareable config
+## Use the recommended config
 
 ```js
-import { docusaurusPluginConfigs } from "stylelint-plugin-docusaurus";
+import { performanceBudgetPluginConfigs } from "stylelint-plugin-css-performance-budget";
 
-export default docusaurusPluginConfigs["docusaurus-recommended"];
+export default performanceBudgetPluginConfigs["performance-budget-recommended"];
 ```
 
-## Quick start with `extends`
+## Use plugin + explicit rules
 
 ```js
-export default {
- extends: [
-  "stylelint-config-standard",
-  "stylelint-config-recess-order",
-  "stylelint-config-idiomatic-order",
-  "stylelint-config-standard-scss",
-  "stylelint-config-tailwindcss",
-  "stylelint-plugin-docusaurus/configs/docusaurus-recommended",
- ],
-};
-```
-
-## Manual plugin registration
-
-If you prefer to compose rules manually:
-
-```js
-import docusaurusPlugin from "stylelint-plugin-docusaurus";
+import performanceBudgetPlugin from "stylelint-plugin-css-performance-budget";
 
 export default {
- plugins: ["stylelint-plugin-docusaurus"],
- // Alternative explicit pack form:
- // plugins: [...docusaurusPlugin],
- rules: {
-  "docusaurus/no-mobile-navbar-backdrop-filter": true,
- },
+    plugins: [...performanceBudgetPlugin],
+    rules: {
+        "css-performance-budget/no-layout-thrashing-properties": true,
+        "css-performance-budget/no-paint-heavy-declarations": true,
+    },
 };
 ```
-
-This package default-exports a plugin-pack array, so both plugin registration forms are supported.

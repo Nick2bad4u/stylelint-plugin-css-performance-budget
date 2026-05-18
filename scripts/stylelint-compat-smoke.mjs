@@ -1,800 +1,246 @@
 #!/usr/bin/env node
 
 /**
- * @remarks
- * This script is intended for compatibility-matrix jobs that temporarily
- * install an older supported Stylelint major (for example 16.x) before running
- * the smoke check. We intentionally do not target Stylelint 15 because the
- * first officially supported ESM plugin line starts at Stylelint 16.
- *
  * @packageDocumentation
- * Smoke test the built plugin against an installed Stylelint runtime.
+ * Smoke test the built plugin against the installed Stylelint runtime.
  */
 // @ts-check
 
 import { isDeepStrictEqual } from "node:util";
 import { readFileSync } from "node:fs";
 import { createRequire } from "node:module";
-import { resolve } from "node:path";
 import process from "node:process";
-import { fileURLToPath, pathToFileURL } from "node:url";
+import { fileURLToPath } from "node:url";
 
 import pc from "picocolors";
 
 const expectedStylelintMajorArgumentPrefix = "--expect-stylelint-major=";
-const builtPluginModuleUrl = new URL("../dist/plugin.js", import.meta.url);
 const builtPluginCjsPath = fileURLToPath(
     new URL("../dist/plugin.cjs", import.meta.url)
 );
 
-/** @param {string} value */
-const isWindowsAbsolutePath = (value) => /^[A-Za-z]:[\\/]/u.test(value);
-
-/**
- * @param {string} filePath
- *
- * @returns {string}
- */
-const toFileHref = (filePath) => {
-    if (isWindowsAbsolutePath(filePath)) {
-        const normalized = filePath.replaceAll("\\", "/");
-
-        return new URL(`file:///${normalized}`).href;
-    }
-
-    return pathToFileURL(resolve(filePath)).href;
-};
-
-/**
- * @typedef {(string | import("stylelint").Plugin)[]} StylelintConfigPluginArray
- */
-
-/**
- * @typedef {Readonly<{
- *     code: string;
- *     config: import("stylelint").Config;
- *     codeFilename: string;
- *     name: string;
- * }>} ConfigScenario
- */
-
-/**
- * @typedef {Readonly<{
- *     invalidOptionWarnings?: readonly unknown[];
- *     parseErrors?: readonly unknown[];
- *     warnings?: readonly unknown[];
- * }>} StylelintResultLike
- */
-
-/**
- * @typedef {Readonly<{
- *     lint: (
- *         input: Readonly<{
- *             code: string;
- *             codeFilename: string;
- *             config: import("stylelint").Config;
- *         }>
- *     ) => Promise<
- *         Readonly<{
- *             results: readonly StylelintResultLike[];
- *         }>
- *     >;
- * }>} StylelintLike
- */
-
-/**
- * @typedef {Readonly<{
- *     "docusaurus-all": import("stylelint").Config &
- *         Readonly<{
- *             plugins: StylelintConfigPluginArray;
- *             rules: Readonly<Record<string, unknown>>;
- *         }>;
- *     "docusaurus-recommended": import("stylelint").Config &
- *         Readonly<{
- *             plugins: StylelintConfigPluginArray;
- *             rules: Readonly<Record<string, unknown>>;
- *         }>;
- * }>} BuiltPluginConfigs
- */
-
-/**
- * @typedef {Readonly<{
- *     builtPluginCjs: unknown;
- *     configNames: readonly string[];
- *     docusaurusPluginConfigs: BuiltPluginConfigs;
- *     meta: Readonly<{
- *         name: string;
- *         namespace: string;
- *     }>;
- *     plugin: StylelintConfigPluginArray;
- *     ruleIds: readonly string[];
- *     ruleNames: readonly string[];
- *     rules: Readonly<
- *         Record<
- *             string,
- *             Readonly<{
- *                 ruleName: string;
- *             }>
- *         >
- *     >;
- * }>} BuiltPluginSurface
- */
-
-/**
- * @typedef {Pick<typeof console, "log">} InfoLogger
- */
-
-/**
- * @typedef {Pick<typeof console, "error" | "log">} CliLogger
- */
-
-/**
- * @param {readonly string[]} argv
- *
- * @returns {number | undefined}
- */
-export function parseExpectedStylelintMajor(argv) {
-    const matchingArgument = argv.find((argument) =>
-        argument.startsWith(expectedStylelintMajorArgumentPrefix)
+/** @param {readonly string[]} argv */
+const parseExpectedStylelintMajor = (argv) => {
+    const argument = argv.find((entry) =>
+        entry.startsWith(expectedStylelintMajorArgumentPrefix)
     );
 
-    if (matchingArgument === undefined) {
+    if (argument === undefined) {
         return undefined;
     }
 
-    const majorString = matchingArgument.slice(
-        expectedStylelintMajorArgumentPrefix.length
-    );
+    const value = argument.slice(expectedStylelintMajorArgumentPrefix.length);
 
-    if (majorString.length === 0) {
-        throw new Error(
-            `Missing Stylelint major value in argument: ${matchingArgument}`
-        );
+    if (!/^[1-9]\d*$/u.test(value)) {
+        throw new TypeError(`Invalid Stylelint major argument: ${argument}`);
     }
 
-    if (!/^[1-9]\d*$/u.test(majorString)) {
-        throw new Error(
-            `Invalid Stylelint major value in argument: ${matchingArgument}`
-        );
-    }
+    return Number.parseInt(value, 10);
+};
 
-    return Number.parseInt(majorString, 10);
-}
+/** @param {unknown} value */
+const toRecord = (value) =>
+    (typeof value === "object" && value !== null) || typeof value === "function"
+        ? /** @type {Record<string, unknown>} */ (value)
+        : {};
 
-/**
- * @param {Readonly<{
- *     argvEntry?: string | undefined;
- *     currentImportUrl: string;
- * }>} input
- *
- * @returns {boolean}
- */
-export const isDirectExecution = ({ argvEntry, currentImportUrl }) =>
-    typeof argvEntry === "string" && toFileHref(argvEntry) === currentImportUrl;
-
-/**
- * @param {unknown} value
- *
- * @returns {value is Record<string, unknown>}
- */
-function isRecord(value) {
-    return typeof value === "object" && value !== null;
-}
-
-/**
- * @param {unknown} value
- *
- * @returns {Record<string, unknown>}
- */
-function toRecord(value) {
-    return isRecord(value) ? value : {};
-}
-
-/**
- * @param {unknown} value
- *
- * @returns {value is StylelintLike}
- */
-function hasLintFunction(value) {
-    if (typeof value !== "function" && !isRecord(value)) {
-        return false;
-    }
-
-    return typeof Reflect.get(value, "lint") === "function";
-}
-
-/**
- * @param {unknown} error
- *
- * @returns {Error}
- */
-function createMissingBuildArtifactsError(error) {
-    return new Error(
-        "Unable to load built plugin artifacts from dist/. Run `npm run build` before running the Stylelint compatibility smoke check.",
-        {
-            cause: error instanceof Error ? error : undefined,
-        }
-    );
-}
-
-/**
- * @param {unknown} error
- *
- * @returns {boolean}
- */
-function isMissingBuildArtifactsIssue(error) {
-    if (!(error instanceof Error)) {
-        return false;
-    }
-
+/** @param {unknown} runtimeCandidate */
+const normalizeStylelintRuntime = (runtimeCandidate) => {
     if (
-        error.message.includes(
-            "Run `npm run build` before running the Stylelint compatibility smoke check."
-        )
+        typeof runtimeCandidate === "function" ||
+        toRecord(runtimeCandidate)["lint"] instanceof Function
     ) {
-        return false;
+        return /** @type {{ lint: Function }} */ (runtimeCandidate);
     }
 
-    return [
-        "dist/plugin.js",
-        "dist/plugin.cjs",
-        String.raw`dist\plugin.js`,
-        String.raw`dist\plugin.cjs`,
-    ].some((artifactPath) => error.message.includes(artifactPath));
-}
+    const defaultCandidate = toRecord(runtimeCandidate)["default"];
 
-/**
- * @param {unknown} runtimeCandidate
- *
- * @returns {StylelintLike}
- */
-export function normalizeStylelintRuntime(runtimeCandidate) {
-    if (hasLintFunction(runtimeCandidate)) {
-        return runtimeCandidate;
+    if (toRecord(defaultCandidate)["lint"] instanceof Function) {
+        return /** @type {{ lint: Function }} */ (defaultCandidate);
     }
 
-    const moduleRecord = toRecord(runtimeCandidate);
-    const defaultRuntimeCandidate = moduleRecord["default"];
+    throw new TypeError("Unable to load Stylelint runtime.");
+};
 
-    if (hasLintFunction(defaultRuntimeCandidate)) {
-        return defaultRuntimeCandidate;
+const getStylelintRuntimeVersion = () => {
+    const requireFn = createRequire(import.meta.url);
+    const pkgPath = requireFn.resolve("stylelint/package.json");
+    const pkg = JSON.parse(readFileSync(pkgPath, "utf8"));
+
+    if (typeof pkg.version !== "string" || pkg.version.length === 0) {
+        throw new TypeError("Unable to determine Stylelint version.");
     }
 
-    throw new TypeError("Unable to load a Stylelint runtime with lint().");
-}
+    return pkg.version;
+};
 
-/**
- * @param {Readonly<{
- *     importModuleFn?: (() => Promise<unknown>) | undefined;
- * }>} [input]
- *
- * @returns {Promise<StylelintLike>}
- */
-async function loadStylelintRuntime({
-    importModuleFn = () => import("stylelint"),
-} = {}) {
-    const importedModule = await importModuleFn();
+const assertStylelintMajor = (expectedMajor, runtimeVersion) => {
+    const [majorText] = runtimeVersion.split(".", 1);
+    const runtimeMajor = Number.parseInt(majorText ?? "", 10);
 
-    return normalizeStylelintRuntime(importedModule);
-}
-
-/**
- * @param {Readonly<{
- *     readFileSyncFn?: typeof readFileSync;
- *     requireFn?: NodeJS.Require | undefined;
- * }>} [input]
- *
- * @returns {string}
- */
-function getStylelintRuntimeVersion({
-    readFileSyncFn = readFileSync,
-    requireFn = createRequire(import.meta.url),
-} = {}) {
-    const stylelintPackageJsonPath = requireFn.resolve(
-        "stylelint/package.json"
-    );
-    const packageJsonText = readFileSyncFn(stylelintPackageJsonPath, "utf8");
-    const packageJson = /** @type {{ version?: unknown }} */ (
-        JSON.parse(packageJsonText)
-    );
-
-    if (
-        typeof packageJson.version !== "string" ||
-        packageJson.version.length === 0
-    ) {
-        throw new Error("Unable to determine Stylelint runtime version.");
-    }
-
-    return packageJson.version;
-}
-
-/**
- * @param {number | undefined} expectedMajor
- * @param {Readonly<{
- *     logger?: InfoLogger | undefined;
- *     runtimeVersion: string;
- * }>} input
- *
- * @returns {number}
- */
-export function assertStylelintMajor(
-    expectedMajor,
-    { logger = console, runtimeVersion }
-) {
-    const [runtimeMajorText] = runtimeVersion.split(".", 1);
-
-    if (runtimeMajorText === undefined || runtimeMajorText.length === 0) {
-        throw new Error(
-            `Unable to parse Stylelint runtime version: ${runtimeVersion}`
-        );
-    }
-
-    const runtimeMajor = Number.parseInt(runtimeMajorText, 10);
-
-    if (Number.isNaN(runtimeMajor)) {
+    if (!Number.isFinite(runtimeMajor)) {
         throw new TypeError(
-            `Unable to parse Stylelint runtime version: ${runtimeVersion}`
+            `Invalid Stylelint runtime version: ${runtimeVersion}`
         );
     }
 
     if (expectedMajor !== undefined && runtimeMajor !== expectedMajor) {
         throw new Error(
-            `Expected Stylelint major ${expectedMajor}, but detected ${runtimeVersion}.`
+            `Expected Stylelint major ${expectedMajor}, detected ${runtimeVersion}.`
         );
     }
 
-    logger.log(
-        `${pc.green("✓")} Stylelint runtime ${pc.bold(runtimeVersion)} detected for compatibility smoke checks.`
+    console.log(
+        `${pc.green("✓")} Stylelint runtime ${pc.bold(runtimeVersion)} detected.`
     );
+};
 
-    return runtimeMajor;
-}
-
-/**
- * @param {unknown} candidate
- *
- * @returns {Readonly<{
- *     allRuleKeys: readonly string[];
- *     configNames: readonly unknown[];
- *     meta: unknown;
- *     recommendedRuleKeys: readonly string[];
- *     ruleIds: readonly unknown[];
- *     ruleKeys: readonly string[];
- *     ruleNames: readonly unknown[];
- * }>}
- */
-function createSurfaceSnapshot(candidate) {
-    const candidateRecord = toRecord(candidate);
-    const pluginConfigsRecord = toRecord(
-        candidateRecord["docusaurusPluginConfigs"]
-    );
-    const allConfigRecord = toRecord(pluginConfigsRecord["docusaurus-all"]);
-    const recommendedConfigRecord = toRecord(
-        pluginConfigsRecord["docusaurus-recommended"]
-    );
+const createSnapshot = (candidate) => {
+    const record = toRecord(candidate);
+    const configs = toRecord(record["performanceBudgetPluginConfigs"]);
 
     return {
-        allRuleKeys: Object.keys(toRecord(allConfigRecord["rules"])),
-        configNames: Array.isArray(candidateRecord["configNames"])
-            ? candidateRecord["configNames"]
+        configNames: Array.isArray(record["configNames"])
+            ? record["configNames"]
             : [],
-        meta: candidateRecord["meta"],
-        recommendedRuleKeys: Object.keys(
-            toRecord(recommendedConfigRecord["rules"])
+        meta: record["meta"],
+        ruleIds: Array.isArray(record["ruleIds"]) ? record["ruleIds"] : [],
+        ruleNames: Array.isArray(record["ruleNames"])
+            ? record["ruleNames"]
+            : [],
+        rules: Object.keys(toRecord(record["rules"])),
+        allRules: Object.keys(
+            toRecord(toRecord(configs["performance-budget-all"])["rules"])
         ),
-        ruleIds: Array.isArray(candidateRecord["ruleIds"])
-            ? candidateRecord["ruleIds"]
-            : [],
-        ruleKeys: Object.keys(toRecord(candidateRecord["rules"])),
-        ruleNames: Array.isArray(candidateRecord["ruleNames"])
-            ? candidateRecord["ruleNames"]
-            : [],
+        recommendedRules: Object.keys(
+            toRecord(
+                toRecord(configs["performance-budget-recommended"])["rules"]
+            )
+        ),
     };
-}
+};
 
-/**
- * @param {Readonly<{
- *     importModuleFn?: (() => Promise<unknown>) | undefined;
- *     requireFn?: NodeJS.Require | undefined;
- * }>} [input]
- *
- * @returns {Promise<BuiltPluginSurface>}
- */
-async function loadBuiltPluginSurface({
-    // eslint-disable-next-line no-unsanitized/method -- builtPluginModuleUrl is an internal fixed file URL under this repository
-    importModuleFn = () => import(builtPluginModuleUrl.href),
-    requireFn = createRequire(import.meta.url),
-} = {}) {
-    try {
-        const builtPluginModule =
-            /** @type {Readonly<Record<string, unknown>>} */ (
-                await importModuleFn()
-            );
-        const builtPluginCjs = requireFn(builtPluginCjsPath);
+const loadBuiltSurface = async () => {
+    const esmModule = await import("../dist/plugin.js");
+    const requireFn = createRequire(import.meta.url);
+    const cjsModule = requireFn(builtPluginCjsPath);
 
-        return {
-            builtPluginCjs,
-            configNames: /** @type {readonly string[]} */ (
-                builtPluginModule["configNames"]
-            ),
-            docusaurusPluginConfigs: /** @type {BuiltPluginConfigs} */ (
-                builtPluginModule["docusaurusPluginConfigs"]
-            ),
-            meta: /** @type {BuiltPluginSurface["meta"]} */ (
-                builtPluginModule["meta"]
-            ),
-            plugin: /** @type {StylelintConfigPluginArray} */ (
-                builtPluginModule["default"]
-            ),
-            ruleIds: /** @type {readonly string[]} */ (
-                builtPluginModule["ruleIds"]
-            ),
-            ruleNames: /** @type {readonly string[]} */ (
-                builtPluginModule["ruleNames"]
-            ),
-            rules: /** @type {BuiltPluginSurface["rules"]} */ (
-                builtPluginModule["rules"]
-            ),
-        };
-    } catch (error) {
-        throw createMissingBuildArtifactsError(error);
-    }
-}
+    return {
+        cjsModule,
+        esmModule,
+    };
+};
 
-/**
- * Validate the public built plugin surface before running runtime smoke tests.
- *
- * @param {BuiltPluginSurface} surface
- * @param {Readonly<{
- *     logger?: InfoLogger | undefined;
- * }>} [input]
- */
-export function assertPluginSurface(surface, { logger = console } = {}) {
-    const {
-        builtPluginCjs,
-        configNames,
-        docusaurusPluginConfigs,
-        meta,
-        plugin,
-        ruleIds,
-        ruleNames,
-        rules,
-    } = surface;
+const assertBuiltSurface = (esmModule, cjsModule) => {
+    const esmRecord = toRecord(esmModule);
+    const meta = toRecord(esmRecord["meta"]);
 
-    if (!Array.isArray(plugin)) {
-        throw new TypeError(
-            "Default plugin export must be an array (plugin pack)."
+    if (meta["namespace"] !== "css-performance-budget") {
+        throw new Error(
+            `Expected namespace css-performance-budget, got ${String(meta["namespace"])}.`
         );
     }
 
-    if (typeof meta.name !== "string" || meta.name.length === 0) {
-        throw new TypeError("Plugin metadata is missing a package name.");
-    }
+    const configs = toRecord(esmRecord["performanceBudgetPluginConfigs"]);
 
-    if (meta.namespace !== "docusaurus") {
-        throw new TypeError(
-            `Expected plugin namespace 'docusaurus', received '${meta.namespace}'.`
-        );
-    }
-
-    if (
-        !Array.isArray(configNames) ||
-        configNames.length === 0 ||
-        !Array.isArray(
-            docusaurusPluginConfigs["docusaurus-recommended"].plugins
-        ) ||
-        !Array.isArray(docusaurusPluginConfigs["docusaurus-all"].plugins)
-    ) {
-        throw new TypeError("Config names export is unavailable.");
-    }
-
-    if (ruleNames.length !== ruleIds.length) {
-        throw new TypeError("Rule names and rule ids are out of sync.");
-    }
-
-    for (const [ruleName, ruleDefinition] of Object.entries(rules)) {
-        if (!ruleDefinition.ruleName.includes("/")) {
-            throw new TypeError(
-                `Rule '${ruleName}' is missing a namespaced ruleName.`
-            );
+    for (const configName of [
+        "performance-budget-recommended",
+        "performance-budget-all",
+        "performance-budget-strict",
+    ]) {
+        if (!(configName in configs)) {
+            throw new Error(`Missing config export: ${configName}`);
         }
     }
 
-    if (!Array.isArray(builtPluginCjs)) {
-        throw new TypeError(
-            "Built CommonJS entrypoint must expose the plugin pack as an array."
-        );
-    }
-
     if (
-        !isDeepStrictEqual(
-            createSurfaceSnapshot({
-                configNames,
-                docusaurusPluginConfigs,
-                meta,
-                ruleIds,
-                ruleNames,
-                rules,
-            }),
-            createSurfaceSnapshot(builtPluginCjs)
-        )
+        !isDeepStrictEqual(createSnapshot(esmModule), createSnapshot(cjsModule))
     ) {
-        throw new TypeError(
-            "Built CommonJS entrypoint must preserve named exports alongside the default plugin pack."
-        );
+        throw new Error("CJS build does not preserve ESM plugin surface.");
     }
 
-    logger.log(
-        `${pc.green("✓")} Plugin surface exports are structurally valid.`
-    );
-}
+    console.log(`${pc.green("✓")} Plugin surface exports are valid.`);
+};
 
-/**
- * @param {ConfigScenario} scenario
- * @param {Readonly<{
- *     logger?: InfoLogger | undefined;
- *     stylelint: StylelintLike;
- * }>} input
- *
- * @returns {Promise<void>}
- */
-export async function runConfigScenario(
-    { code, codeFilename, config, name },
-    { logger = console, stylelint }
-) {
-    const lintResult = await stylelint.lint({
-        code,
-        codeFilename,
+const runScenario = async (stylelintRuntime, scenarioName, config) => {
+    const lintResult = await stylelintRuntime.lint({
+        code: ".component { color: #0b63f6; }",
+        codeFilename: "component.css",
         config,
     });
-    const [result] = lintResult.results;
+    const [firstResult] = lintResult.results;
 
-    if (result === undefined) {
-        throw new Error(`${name}: Stylelint did not return a result.`);
+    if (firstResult === undefined) {
+        throw new Error(`${scenarioName}: missing stylelint result.`);
     }
 
-    const parseErrors = result.parseErrors ?? [];
-    const invalidOptionWarnings = result.invalidOptionWarnings ?? [];
-    const warnings = result.warnings ?? [];
-
-    if (parseErrors.length > 0) {
-        throw new Error(
-            `${name}: encountered parse errors (${parseErrors.length}).`
-        );
+    if ((firstResult.parseErrors ?? []).length > 0) {
+        throw new Error(`${scenarioName}: parse errors detected.`);
     }
 
-    if (invalidOptionWarnings.length > 0) {
-        throw new Error(
-            `${name}: encountered invalid option warnings (${invalidOptionWarnings.length}).`
-        );
+    if ((firstResult.invalidOptionWarnings ?? []).length > 0) {
+        throw new Error(`${scenarioName}: invalid option warnings detected.`);
     }
 
-    if (warnings.length > 0) {
-        throw new Error(
-            `${name}: expected zero warnings, received ${warnings.length}.`
-        );
+    if ((firstResult.warnings ?? []).length > 0) {
+        throw new Error(`${scenarioName}: expected zero warnings.`);
     }
 
-    logger.log(`${pc.green("✓")} ${pc.bold(name)} completed without warnings.`);
-}
+    console.log(`${pc.green("✓")} ${pc.bold(scenarioName)} passed.`);
+};
 
-/**
- * @param {Pick<BuiltPluginSurface, "docusaurusPluginConfigs" | "plugin">} input
- *
- * @returns {readonly ConfigScenario[]}
- */
-export function createScenarios({ docusaurusPluginConfigs, plugin }) {
-    const baselineCssModule = `
-.heroBanner {
-    --hero-banner-color: var(--ifm-color-primary);
-    color: var(--hero-banner-color);
-}
-`.trim();
-
-    const baselineGlobalCss = `
-:root {
-    --ifm-color-primary: #4e89e8;
-    --ifm-color-primary-dark: #3576d4;
-    --ifm-color-primary-darker: #2c68be;
-    --ifm-color-primary-darkest: #234f92;
-    --ifm-color-primary-light: #6d9ef0;
-    --ifm-color-primary-lighter: #89b1f4;
-    --ifm-color-primary-lightest: #b8d0fa;
-}
-
-html[data-theme='light'] .DocSearch {
-    --docsearch-primary-color: #4f46e5;
-}
-
-html[data-theme='dark'] .DocSearch {
-    --docsearch-primary-color: #818cf8;
-}
-
-[data-theme='dark'] {
-    --ifm-color-primary: #8ab4f8;
-    --ifm-color-primary-dark: #6ea3f5;
-    --ifm-color-primary-darker: #5a97f3;
-    --ifm-color-primary-darkest: #2f7ce9;
-    --ifm-color-primary-light: #a6c5fb;
-    --ifm-color-primary-lighter: #bad1fc;
-    --ifm-color-primary-lightest: #ebf3fe;
-}
-
-.theme-doc-markdown h2 {
-    margin-block-start: 2rem;
-}
-
-.theme-doc-sidebar-menu .menu__link {
-    font-weight: 700;
-}
-
-.heroBanner {
-    color: var(--ifm-color-primary);
-}
-`.trim();
-
-    return [
-        {
-            code: baselineCssModule,
-            codeFilename: "Component.module.css",
-            config: {
-                plugins: Array.from(plugin),
-                rules: {},
-            },
-            name: "direct-plugin-pack-modules",
-        },
-        {
-            code: baselineCssModule,
-            codeFilename: "Component.module.css",
-            config: {
-                ...docusaurusPluginConfigs["docusaurus-recommended"],
-                plugins: Array.from(
-                    docusaurusPluginConfigs["docusaurus-recommended"].plugins
-                ),
-                rules: {
-                    ...docusaurusPluginConfigs["docusaurus-recommended"].rules,
-                },
-            },
-            name: "recommended-config-modules",
-        },
-        {
-            code: baselineCssModule,
-            codeFilename: "Component.module.css",
-            config: {
-                ...docusaurusPluginConfigs["docusaurus-all"],
-                plugins: Array.from(
-                    docusaurusPluginConfigs["docusaurus-all"].plugins
-                ),
-                rules: {
-                    ...docusaurusPluginConfigs["docusaurus-all"].rules,
-                },
-            },
-            name: "all-config-modules",
-        },
-        {
-            code: baselineGlobalCss,
-            codeFilename: "src/css/custom.css",
-            config: {
-                ...docusaurusPluginConfigs["docusaurus-recommended"],
-                plugins: Array.from(
-                    docusaurusPluginConfigs["docusaurus-recommended"].plugins
-                ),
-                rules: {
-                    ...docusaurusPluginConfigs["docusaurus-recommended"].rules,
-                },
-            },
-            name: "recommended-config-global",
-        },
-        {
-            code: baselineGlobalCss,
-            codeFilename: "src/css/custom.css",
-            config: {
-                ...docusaurusPluginConfigs["docusaurus-all"],
-                plugins: Array.from(
-                    docusaurusPluginConfigs["docusaurus-all"].plugins
-                ),
-                rules: {
-                    ...docusaurusPluginConfigs["docusaurus-all"].rules,
-                },
-            },
-            name: "all-config-global",
-        },
-    ];
-}
-
-/**
- * @param {Readonly<{
- *     argv?: readonly string[];
- *     loadBuiltPluginSurfaceFn?:
- *         | (() => Promise<BuiltPluginSurface>)
- *         | undefined;
- *     loadStylelintFn?: (() => Promise<StylelintLike>) | undefined;
- *     logger?: InfoLogger | undefined;
- *     stylelintRuntimeVersion?: string | undefined;
- * }>} [input]
- *
- * @returns {Promise<void>}
- */
-export async function runStylelintCompatSmoke({
-    argv = process.argv.slice(2),
-    loadBuiltPluginSurfaceFn = loadBuiltPluginSurface,
-    loadStylelintFn = loadStylelintRuntime,
-    logger = console,
-    stylelintRuntimeVersion,
-} = {}) {
-    const expectedStylelintMajor = parseExpectedStylelintMajor(argv);
-    const runtimeVersion =
-        stylelintRuntimeVersion ?? getStylelintRuntimeVersion();
-
-    logger.log(
+const runStylelintCompatSmoke = async (argv = process.argv.slice(2)) => {
+    console.log(
         pc.bold(pc.cyan("Running Stylelint compatibility smoke checks..."))
     );
 
-    assertStylelintMajor(expectedStylelintMajor, {
-        logger,
-        runtimeVersion,
+    const expectedMajor = parseExpectedStylelintMajor(argv);
+    const runtimeVersion = getStylelintRuntimeVersion();
+
+    assertStylelintMajor(expectedMajor, runtimeVersion);
+
+    const stylelintRuntime = normalizeStylelintRuntime(
+        await import("stylelint")
+    );
+    const { esmModule, cjsModule } = await loadBuiltSurface();
+
+    assertBuiltSurface(esmModule, cjsModule);
+
+    const configs = /**
+     * @type {Record<
+     *     string,
+     *     { plugins: unknown[]; rules: Record<string, unknown> }
+     * >}
+     */ (toRecord(toRecord(esmModule)["performanceBudgetPluginConfigs"]));
+
+    await runScenario(stylelintRuntime, "recommended-config", {
+        ...configs["performance-budget-recommended"],
+        plugins: [...configs["performance-budget-recommended"].plugins],
+        rules: { ...configs["performance-budget-recommended"].rules },
     });
 
-    const stylelint = await loadStylelintFn();
-    const builtPluginSurface = await loadBuiltPluginSurfaceFn().catch(
-        (error) => {
-            if (isMissingBuildArtifactsIssue(error)) {
-                throw createMissingBuildArtifactsError(error);
-            }
+    await runScenario(stylelintRuntime, "all-config", {
+        ...configs["performance-budget-all"],
+        plugins: [...configs["performance-budget-all"].plugins],
+        rules: { ...configs["performance-budget-all"].rules },
+    });
 
-            throw error;
-        }
-    );
-
-    assertPluginSurface(builtPluginSurface, { logger });
-
-    for (const scenario of createScenarios({
-        docusaurusPluginConfigs: builtPluginSurface.docusaurusPluginConfigs,
-        plugin: builtPluginSurface.plugin,
-    })) {
-        await runConfigScenario(scenario, {
-            logger,
-            stylelint,
-        });
-    }
-
-    logger.log(
+    console.log(
         pc.bold(pc.green("Stylelint compatibility smoke checks passed."))
     );
-}
+};
 
-/**
- * @param {Readonly<{
- *     argv?: readonly string[];
- *     logger?: CliLogger | undefined;
- * }>} [input]
- *
- * @returns {Promise<number>}
- */
-export async function runCli({
-    argv = process.argv.slice(2),
-    logger = console,
-} = {}) {
+const runCli = async () => {
     try {
-        await runStylelintCompatSmoke({
-            argv,
-            logger,
-        });
-
+        await runStylelintCompatSmoke();
         return 0;
     } catch (error) {
-        logger.error(error instanceof Error ? error.message : String(error));
-
+        console.error(error instanceof Error ? error.message : String(error));
         return 1;
     }
-}
+};
 
-if (
-    isDirectExecution({
-        argvEntry: process.argv[1],
-        currentImportUrl: import.meta.url,
-    })
-) {
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
     const exitCode = await runCli();
 
     if (exitCode !== 0) {

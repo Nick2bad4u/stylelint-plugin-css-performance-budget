@@ -30,7 +30,7 @@ import { escapeMarkdownTableCell } from "./_internal/escape-markdown-table-cell.
 /**
  * @typedef {Readonly<{
  *     configNames?: unknown;
- *     docusaurusPluginConfigs?: ConfigMap;
+ *     performanceBudgetPluginConfigs?: ConfigMap;
  *     rules?: RulesMap;
  * }>} BuiltPluginModule
  */
@@ -152,16 +152,16 @@ export const loadBuiltPluginMetadata = async ({
 } = {}) => {
     try {
         const builtPluginModule = await importModule(builtPluginPath);
-        const docusaurusPluginConfigs = /** @type {ConfigMap} */ (
-            builtPluginModule.docusaurusPluginConfigs ?? {}
+        const performanceBudgetPluginConfigs = /** @type {ConfigMap} */ (
+            builtPluginModule.performanceBudgetPluginConfigs ?? {}
         );
 
         return {
             configNames: normalizeConfigNames(
                 builtPluginModule.configNames,
-                docusaurusPluginConfigs
+                performanceBudgetPluginConfigs
             ),
-            configs: docusaurusPluginConfigs,
+            configs: performanceBudgetPluginConfigs,
             rules: /** @type {RulesMap} */ (builtPluginModule.rules ?? {}),
         };
     } catch (error) {

@@ -7,7 +7,7 @@
         "education",
         "productivity"
     ],
-    "description": "Documentation site for stylelint-plugin-docusaurus, including config guidance, template status, and API docs.",
+    "description": "Documentation site for stylelint-plugin-css-performance-budget, including rule guidance, preset docs, and API references.",
     "dir": "ltr",
     "display": "standalone",
     "display_override": [
@@ -43,14 +43,14 @@
     ],
     "id": "./",
     "lang": "en",
-    "name": "stylelint-plugin-docusaurus Documentation",
+    "name": "stylelint-plugin-css-performance-budget Documentation",
     "orientation": "any",
     "prefer_related_applications": false,
     "scope": ".",
-    "short_name": "Docusaurus Stylelint Docs",
+    "short_name": "CSS Budget Docs",
     "shortcuts": [
         {
-            "description": "Read the overview and setup guidance for stylelint-plugin-docusaurus.",
+            "description": "Read the overview and setup guidance for stylelint-plugin-css-performance-budget.",
             "icons": [
                 {
                     "sizes": "192x192",

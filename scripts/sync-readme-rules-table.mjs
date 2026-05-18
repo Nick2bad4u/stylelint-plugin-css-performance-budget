@@ -189,12 +189,13 @@ const getRuleFixIndicator = (ruleModule) =>
  *
  * Mapping:
  *
- * - 🟢 = `docusaurusPluginConfigs["docusaurus-recommended"]`
- * - 🟣 = `docusaurusPluginConfigs["docusaurus-all"]`
- * - 🛡️ = `docusaurusPluginConfigs["docusaurus-docs-safe"]`
+ * - 🟢 = `performanceBudgetPluginConfigs["performance-budget-recommended"]`
+ * - 🟣 = `performanceBudgetPluginConfigs["performance-budget-all"]`
+ * - 🛡️ = `performanceBudgetPluginConfigs["performance-budget-strict"]`
  *
- * Rules in `docusaurus-recommended` are also in `docusaurus-docs-safe`, so they
- * show all three badges. Rules only in `docusaurus-all` show just 🟣.
+ * Rules in `performance-budget-recommended` are also in
+ * `performance-budget-strict`, so they show all three badges. Rules only in
+ * `performance-budget-all` show just 🟣.
  *
  * @param {RuleModule} ruleModule
  *
@@ -202,8 +203,8 @@ const getRuleFixIndicator = (ruleModule) =>
  */
 const getPresetKeyIndicator = (ruleModule) =>
     ruleModule.docs?.recommended === true
-        ? "[🟢](./docs/rules/configs/docusaurus-recommended.md) [🛡️](./docs/rules/configs/docusaurus-docs-safe.md) [🟣](./docs/rules/configs/docusaurus-all.md)"
-        : "[🟣](./docs/rules/configs/docusaurus-all.md)";
+        ? "[🟢](./docs/rules/configs/performance-budget-recommended.md) [🛡️](./docs/rules/configs/performance-budget-strict.md) [🟣](./docs/rules/configs/performance-budget-all.md)"
+        : "[🟣](./docs/rules/configs/performance-budget-all.md)";
 
 /**
  * Legend block prepended to the Rules section.
@@ -219,9 +220,9 @@ const RULES_SECTION_LEGEND = [
     "",
     "**Preset key legend:**",
     "",
-    '- [🟢](./docs/rules/configs/docusaurus-recommended.md) — `docusaurusPluginConfigs["docusaurus-recommended"]`',
-    '- [🟣](./docs/rules/configs/docusaurus-all.md) — `docusaurusPluginConfigs["docusaurus-all"]`',
-    '- [🛡️](./docs/rules/configs/docusaurus-docs-safe.md) — `docusaurusPluginConfigs["docusaurus-docs-safe"]`',
+    '- [🟢](./docs/rules/configs/performance-budget-recommended.md) — `performanceBudgetPluginConfigs["performance-budget-recommended"]`',
+    '- [🟣](./docs/rules/configs/performance-budget-all.md) — `performanceBudgetPluginConfigs["performance-budget-all"]`',
+    '- [🛡️](./docs/rules/configs/performance-budget-strict.md) — `performanceBudgetPluginConfigs["performance-budget-strict"]`',
 ].join("\n");
 
 /** @param {readonly [string, RuleModule]} entry */
@@ -245,7 +246,7 @@ export const generateReadmeRulesSectionFromRules = (rules) => {
         return [
             "## Rules",
             "",
-            "The public `docusaurus/*` rule catalog is currently empty on purpose.",
+            "The public `css-performance-budget/*` rule catalog is currently empty on purpose.",
             "",
             "This repository already ships the runtime, tests, docs, and build scaffolding required for future Docusaurus-specific Stylelint rules.",
             "",
@@ -314,8 +315,16 @@ export const syncReadmeRulesTable = async ({
         normalizedReadme,
         nextRulesSection
     );
+    const normalizedReadmeForComparison = normalizeMarkdownLineEndings(
+        normalizedReadme,
+        "\n"
+    );
+    const nextReadmeForComparison = normalizeMarkdownLineEndings(
+        nextReadme,
+        "\n"
+    );
 
-    if (nextReadme === normalizedReadme) {
+    if (nextReadmeForComparison === normalizedReadmeForComparison) {
         return {
             changed: false,
             readmeFilePath: resolvedReadmeFilePath,

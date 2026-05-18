@@ -1,28 +1,26 @@
 {
     "$schema": "https://www.schemastore.org/package.json",
-    "name": "stylelint-plugin-docusaurus",
+    "name": "stylelint-plugin-css-performance-budget",
     "version": "2.0.2",
     "private": false,
-    "description": "Stylelint rules and shareable configs for Docusaurus stylesheets.",
+    "description": "Stylelint rules and shareable configs for CSS performance budgets.",
     "keywords": [
         "stylelint",
         "stylelint-plugin",
         "stylelint-config",
-        "stylelintconfig",
-        "stylelintplugin",
-        "docusaurus",
-        "infima",
         "css",
+        "performance",
+        "rendering",
         "postcss"
     ],
-    "homepage": "https://nick2bad4u.github.io/stylelint-plugin-docusaurus/",
+    "homepage": "https://nick2bad4u.github.io/stylelint-plugin-css-performance-budget/",
     "bugs": {
-        "url": "https://github.com/Nick2bad4u/stylelint-plugin-docusaurus/issues",
+        "url": "https://github.com/Nick2bad4u/stylelint-plugin-css-performance-budget/issues",
         "email": "20943337+Nick2bad4u@users.noreply.github.com"
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/Nick2bad4u/stylelint-plugin-docusaurus.git"
+        "url": "git+https://github.com/Nick2bad4u/stylelint-plugin-css-performance-budget.git"
     },
     "license": "MIT",
     "author": "Nick2bad4u <20943337+Nick2bad4u@users.noreply.github.com> (https://github.com/Nick2bad4u)",
@@ -47,34 +45,34 @@
             },
             "default": "./dist/plugin.js"
         },
-        "./configs/docusaurus-all": {
+        "./configs/performance-budget-all": {
             "import": {
-                "types": "./dist/configs/docusaurus-all.d.ts",
-                "default": "./dist/configs/docusaurus-all.js"
+                "types": "./dist/configs/performance-budget-all.d.ts",
+                "default": "./dist/configs/performance-budget-all.js"
             },
             "require": {
-                "types": "./dist/configs/docusaurus-all.d.cts",
-                "default": "./dist/configs/docusaurus-all.cjs"
+                "types": "./dist/configs/performance-budget-all.d.cts",
+                "default": "./dist/configs/performance-budget-all.cjs"
             }
         },
-        "./configs/docusaurus-docs-safe": {
+        "./configs/performance-budget-recommended": {
             "import": {
-                "types": "./dist/configs/docusaurus-docs-safe.d.ts",
-                "default": "./dist/configs/docusaurus-docs-safe.js"
+                "types": "./dist/configs/performance-budget-recommended.d.ts",
+                "default": "./dist/configs/performance-budget-recommended.js"
             },
             "require": {
-                "types": "./dist/configs/docusaurus-docs-safe.d.cts",
-                "default": "./dist/configs/docusaurus-docs-safe.cjs"
+                "types": "./dist/configs/performance-budget-recommended.d.cts",
+                "default": "./dist/configs/performance-budget-recommended.cjs"
             }
         },
-        "./configs/docusaurus-recommended": {
+        "./configs/performance-budget-strict": {
             "import": {
-                "types": "./dist/configs/docusaurus-recommended.d.ts",
-                "default": "./dist/configs/docusaurus-recommended.js"
+                "types": "./dist/configs/performance-budget-strict.d.ts",
+                "default": "./dist/configs/performance-budget-strict.js"
             },
             "require": {
-                "types": "./dist/configs/docusaurus-recommended.d.cts",
-                "default": "./dist/configs/docusaurus-recommended.cjs"
+                "types": "./dist/configs/performance-budget-strict.d.cts",
+                "default": "./dist/configs/performance-budget-strict.cjs"
             }
         },
         "./package.json": "./package.json"
@@ -83,14 +81,14 @@
     "types": "./dist/plugin.d.ts",
     "typesVersions": {
         "*": {
-            "configs/docusaurus-all": [
-                "./dist/configs/docusaurus-all.d.ts"
+            "configs/performance-budget-all": [
+                "./dist/configs/performance-budget-all.d.ts"
             ],
-            "configs/docusaurus-docs-safe": [
-                "./dist/configs/docusaurus-docs-safe.d.ts"
+            "configs/performance-budget-recommended": [
+                "./dist/configs/performance-budget-recommended.d.ts"
             ],
-            "configs/docusaurus-recommended": [
-                "./dist/configs/docusaurus-recommended.d.ts"
+            "configs/performance-budget-strict": [
+                "./dist/configs/performance-budget-strict.d.ts"
             ]
         }
     },
@@ -117,15 +115,15 @@
         "bench:ui": "vitest bench --ui",
         "prebench:watch": "npm run build",
         "bench:watch": "vitest bench",
-        "build": "tsc -b tsconfig.build.json --force && npm run build:types:cjs && npm run build:cjs && npm run build:configs:cjs",
+        "build": "npm run build:clean && tsc -b tsconfig.build.json --force && npm run build:types:cjs && npm run build:cjs && npm run build:configs:cjs",
         "build:cjs": "esbuild dist/plugin.js --bundle --format=cjs --platform=node --packages=external --sourcemap --outfile=dist/plugin.cjs --footer:js=\"module.exports = Object.assign(module.exports.default, module.exports);\"",
         "build:clean": "node -e \"require('node:fs').rmSync('dist',{recursive:true,force:true})\"",
-        "build:configs:cjs": "node -e \"const fs=require('node:fs');['docusaurus-all','docusaurus-docs-safe','docusaurus-recommended'].forEach(n=>{fs.writeFileSync('dist/configs/'+n+'.cjs','\\\"use strict\\\";\\nconst{docusaurusPluginConfigs}=require(\\\"../plugin.cjs\\\");\\nmodule.exports=docusaurusPluginConfigs[\\\"'+n+'\\\"];\\n','utf8');fs.writeFileSync('dist/configs/'+n+'.d.cts','import type{DocusaurusShareableConfig}from\\\"../plugin.cjs\\\";\\ndeclare const config:DocusaurusShareableConfig;\\nexport=config;\\n','utf8');})\"",
-        "build:eslint-inspector": "npx -y @eslint/config-inspector@latest build --outDir \"docs/docusaurus/static/eslint-inspector\" --base \"/stylelint-plugin-docusaurus/eslint-inspector/\"",
+        "build:configs:cjs": "node -e \"const fs=require('node:fs');['performance-budget-all','performance-budget-recommended','performance-budget-strict'].forEach(n=>{fs.writeFileSync('dist/configs/'+n+'.cjs','\\\"use strict\\\";\\nconst{performanceBudgetPluginConfigs}=require(\\\"../plugin.cjs\\\");\\nmodule.exports=performanceBudgetPluginConfigs[\\\"'+n+'\\\"];\\n','utf8');fs.writeFileSync('dist/configs/'+n+'.d.cts','import type{PerformanceBudgetShareableConfig}from\\\"../plugin.cjs\\\";\\ndeclare const config:PerformanceBudgetShareableConfig;\\nexport=config;\\n','utf8');})\"",
+        "build:eslint-inspector": "npx -y @eslint/config-inspector@latest build --outDir \"docs/docusaurus/static/eslint-inspector\" --base \"/stylelint-plugin-css-performance-budget/eslint-inspector/\"",
         "build:eslint-inspector:local": "npx @eslint/config-inspector",
-        "build:stylelint-inspector": "npx -y stylelint-config-inspector@latest build --outDir \"docs/docusaurus/static/stylelint-inspector\" --base \"/stylelint-plugin-docusaurus/stylelint-inspector/\"",
+        "build:stylelint-inspector": "npx -y stylelint-config-inspector@latest build --outDir \"docs/docusaurus/static/stylelint-inspector\" --base \"/stylelint-plugin-css-performance-budget/stylelint-inspector/\"",
         "build:stylelint-inspector:local": "npx stylelint-config-inspector@latest",
-        "build:types:cjs": "node -e \"require('node:fs').copyFileSync('dist/plugin.d.ts','dist/plugin.d.cts')\"",
+        "build:types:cjs": "node -e \"const fs=require('node:fs');fs.writeFileSync('dist/plugin.d.cts','export * from \\\"./plugin.js\\\";\\nimport plugin from \\\"./plugin.js\\\";\\nexport = plugin;\\n','utf8');\"",
         "changelog:generate": "git-cliff --config cliff.toml --output CHANGELOG.md",
         "changelog:preview": "git-cliff --config cliff.toml --unreleased",
         "changelog:release-notes": "git-cliff --config cliff.toml --latest --strip all",
@@ -164,7 +162,7 @@
         "docs:typedoc": "npm run --workspace docs/docusaurus docs:api",
         "docs:validate-links": "remark docs --use remark-validate-links --frail",
         "knip": "cross-env NODE_OPTIONS=--max_old_space_size=4096 NODE_NO_WARNINGS=1 npx knip -c knip.config.ts --include-libs --cache --cache-location .cache/knip --tsConfig tsconfig.json",
-        "lint": "cross-env NODE_OPTIONS=--max_old_space_size=16384 eslint --cache --cache-strategy content --cache-location .cache/.eslintcache",
+        "lint": "cross-env NODE_OPTIONS=--max_old_space_size=16384 eslint --cache --cache-strategy content --cache-location .cache/.eslintcache --quiet",
         "lint:action": "npm run lint:actions",
         "lint:actions": "node scripts/lint-actionlint.mjs",
         "lint:all": "npm run lint && npm run typecheck && npm run lint:css && npm run lint:prettier && npm run lint:remark && npm run lint:package && npm run lint:secretlint && npm run lint:yaml && npm run lint:actions && npm run lint:circular && npm run sync:rules:check",
@@ -188,7 +186,7 @@
         "lint:exports": "ts-unused-exports tsconfig.json src/plugin.ts --excludePathsFromReport=plugin.ts",
         "lint:fix": "cross-env NODE_OPTIONS=--max_old_space_size=16384 eslint --cache --cache-strategy content --cache-location .cache/.eslintcache --fix",
         "lint:fix:quiet": "cross-env ESLINT_PROGRESS=off NODE_OPTIONS=--max_old_space_size=16384 eslint --cache --cache-strategy content --cache-location .cache/.eslintcache --fix && echo \"Eslint fix done!\"",
-        "lint:grype": "grype . -c .grype.yaml --name stylelint-plugin-docusaurus",
+        "lint:grype": "grype . -c .grype.yaml --name stylelint-plugin-css-performance-budget",
         "lint:knip": "npm run knip",
         "lint:knip:exports": "npm run knip -- --include exports,nsExports,classMembers,types,nsTypes,enumMembers,duplicates",
         "lint:knip:unused:exports": "npm run knip -- --dependencies --exports",
@@ -198,8 +196,8 @@
         "lint:orphans": "npm run madge:orphans",
         "lint:package": "npm run lint:node-version-files && npm run lint:package-sort && npm run lint:packagelintrc && echo \"Package.json lint done!\"",
         "lint:package:strict": "npm run lint:node-version-files && npm run lint:package-sort && npm run lint:package-check:strict && npm run lint:packagelintrc && echo \"Package.json lint done!\"",
-        "lint:package-check": "publint && attw --pack .",
-        "lint:package-check:strict": "publint && attw --pack . --profile strict",
+        "lint:package-check": "npm exec -- publint && node scripts/run-attw-check.mjs --pack .",
+        "lint:package-check:strict": "npm exec -- publint && node scripts/run-attw-check.mjs --pack . --profile strict",
         "lint:package-sort": "sort-package-json \"./package.json\" \"./docs/docusaurus/package.json\"",
         "lint:package-sort-check": "sort-package-json --check \"./package.json\" \"./docs/docusaurus/package.json\"",
         "lint:packagelintrc": "npmPkgJsonLint . --config .npmpackagejsonlintrc.json",

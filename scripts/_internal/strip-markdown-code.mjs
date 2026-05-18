@@ -11,21 +11,25 @@
  * @returns {FencedCodeBlockState | undefined}
  */
 function parseOpeningFence(line) {
-    const openingFenceMatch =
-        /^(?: {0,3})(?<fence>`{3,}|~{3,})(?<rest>[^\r\n]*)$/u.exec(line);
+    const withoutIndent = line.replace(/^ {0,3}/u, "");
+    const firstCharacter = withoutIndent[0];
 
-    if (openingFenceMatch?.groups === undefined) {
+    if (firstCharacter !== "`" && firstCharacter !== "~") {
         return undefined;
     }
 
-    const fence = openingFenceMatch.groups["fence"];
+    let fenceLength = 0;
 
-    if (fence === undefined) {
+    while (withoutIndent[fenceLength] === firstCharacter) {
+        fenceLength += 1;
+    }
+
+    if (fenceLength < 3) {
         return undefined;
     }
 
-    const rest = openingFenceMatch.groups["rest"] ?? "";
-    const fenceCharacter = /** @type {"`" | "~"} */ (fence[0]);
+    const rest = withoutIndent.slice(fenceLength);
+    const fenceCharacter = /** @type {"`" | "~"} */ (firstCharacter);
 
     if (fenceCharacter === "`" && rest.includes("`")) {
         return undefined;
@@ -33,7 +37,7 @@ function parseOpeningFence(line) {
 
     return {
         fenceCharacter,
-        minimumFenceLength: fence.length,
+        minimumFenceLength: fenceLength,
     };
 }
 
@@ -44,24 +48,24 @@ function parseOpeningFence(line) {
  * @returns {boolean}
  */
 function isClosingFence(line, fencedCodeBlockState) {
-    const closingFenceMatch = /^(?: {0,3})(?<fence>`{3,}|~{3,})[ \t]*$/u.exec(
-        line
-    );
+    const withoutIndent = line.replace(/^ {0,3}/u, "");
+    const firstCharacter = withoutIndent[0];
 
-    if (closingFenceMatch?.groups === undefined) {
+    if (firstCharacter !== fencedCodeBlockState.fenceCharacter) {
         return false;
     }
 
-    const fence = closingFenceMatch.groups["fence"];
+    let fenceLength = 0;
 
-    if (fence === undefined) {
+    while (withoutIndent[fenceLength] === firstCharacter) {
+        fenceLength += 1;
+    }
+
+    if (fenceLength < fencedCodeBlockState.minimumFenceLength) {
         return false;
     }
 
-    return (
-        fence.startsWith(fencedCodeBlockState.fenceCharacter) &&
-        fence.length >= fencedCodeBlockState.minimumFenceLength
-    );
+    return withoutIndent.slice(fenceLength).trim() === "";
 }
 
 /**

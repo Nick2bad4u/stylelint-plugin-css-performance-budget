@@ -1,47 +1,30 @@
 ---
 title: Overview
-description: Overview of stylelint-plugin-docusaurus and its current package surface.
+description: Overview of stylelint-plugin-css-performance-budget and its package surface.
 ---
 
-# stylelint-plugin-docusaurus
+# stylelint-plugin-css-performance-budget
 
-`stylelint-plugin-docusaurus` is a Stylelint plugin focused on Docusaurus styling conventions, theme-token hygiene, selector stability, CSS Modules boundaries, color-mode correctness, and mobile navbar safety.
+`stylelint-plugin-css-performance-budget` provides focused Stylelint guardrails for CSS rendering cost.
 
-The repository was intentionally converted from a mature ESLint-plugin template into a Stylelint-first package. The infrastructure was already strong; the public rule catalog has now grown into a broader Docusaurus-specific surface.
+## What it checks
 
-## What the package currently exports
+- heavy selectors
+- giant selector lists
+- excessive filter/backdrop stacks and blur radii
+- expensive transition and keyframe property targets
+- broad or risky will-change usage
+- layout-thrashing properties
+- paint-heavy declarations
 
-- A default Stylelint plugin pack export.
-- A plugin-scoped shareable config map: `docusaurusPluginConfigs`
-  - `docusaurus-recommended`
-  - `docusaurus-all`
-  - `docusaurus-docs-safe`
-- Static runtime metadata and typed helper infrastructure for future rule authoring.
+## Package exports
 
-## Current rule status
+- default plugin pack export
+- `performanceBudgetPluginConfigs`
+  - `performance-budget-recommended`
+  - `performance-budget-all`
+  - `performance-budget-strict`
 
-The public rule catalog now includes **33** Docusaurus-specific rules.
+## Rule philosophy
 
-The current families cover:
-
-- theme-token scope and Infima primary-scale guardrails
-- color-mode selector correctness, prefers-color-scheme guidance, and DocSearch color-mode/token/root-scope correctness
-- stable theme class usage and unsafe internal selector detection
-- CSS Modules boundaries for global theme selectors, hidden global overrides, and token consumption (framework and project-scoped tokens)
-- mobile navbar/sidebar safety and breakpoint alignment (including hardcoded Docusaurus breakpoint detection)
-- cascade-layer, `revert-layer`, and broad `all` reset safety
-- HTML data-attribute and content-wrapper selector hygiene
-- interactive-transition reduced-motion accessibility guardrails
-- `@font-face` font-display and local-src ordering correctness
-- Infima/Docusaurus selector override quality (`!important` escalation, `color-scheme` interference)
-
-## What comes next
-
-Future public rules can continue extending Docusaurus-specific authoring concerns such as:
-
-- stricter curated stable-class mappings
-- broader theme-surface token guidance
-- additional swizzle-safe customization contracts
-- more Docusaurus v4 cascade-layer guardrails
-
-The package surface is still intentionally curated: the goal is Docusaurus-specific signal, not a duplicate of generic CSS linting plugins.
+Recommended mode aims for low-noise defaults. The all/strict profiles include broader enforcement for teams that want tighter budgets.

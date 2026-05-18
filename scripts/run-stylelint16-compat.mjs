@@ -292,7 +292,10 @@ export async function runStylelint16Compat({
     windowsCommandShell = getWindowsCommandShell(),
 } = {}) {
     const tempBackupDirectory = await mkdtempFn(
-        join(tmpDirectoryPath, "stylelint-plugin-docusaurus-stylelint16-")
+        join(
+            tmpDirectoryPath,
+            "stylelint-plugin-css-performance-budget-stylelint16-"
+        )
     );
     const { packageJsonBackupPath, packageLockBackupPath } = createBackupPaths({
         packageJsonPath: targetPackageJsonPath,

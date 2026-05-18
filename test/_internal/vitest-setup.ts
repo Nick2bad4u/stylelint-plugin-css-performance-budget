@@ -1,10 +1,7 @@
 /**
- * Shared Vitest setup entrypoint.
- *
- * @remarks
- * The current Stylelint template does not need global test hooks yet, but both
- * the standard Vitest config and the Stryker-specific Vitest config expect a
- * stable setup module path.
+ * Shared Vitest setup for repository tests.
  */
-
-export const vitestSetupLoaded = true;
+const vitestSetupSentinel = true;
+if (!vitestSetupSentinel) {
+    throw new Error("Vitest setup sentinel must remain true.");
+}

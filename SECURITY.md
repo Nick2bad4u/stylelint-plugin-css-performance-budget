@@ -5,7 +5,7 @@
 If you discover a vulnerability in this repository, report it privately using one
 of these channels:
 
-- GitHub Security Advisory draft: <https://github.com/Nick2bad4u/stylelint-plugin-docusaurus/security/advisories/new>
+- GitHub Security Advisory draft: <https://github.com/Nick2bad4u/stylelint-plugin-css-performance-budget/security/advisories/new>
 - Maintainer email: <20943337+Nick2bad4u@users.noreply.github.com>
 
 Please do **not** open public issues for unpatched vulnerabilities.
@@ -35,10 +35,11 @@ fixes.
 
 ## Security Best Practices for Users
 
-- Keep `stylelint-plugin-docusaurus`, Stylelint, and dependencies updated.
+- Keep `stylelint-plugin-css-performance-budget`, Stylelint, and dependencies updated.
 - Run linting in CI on trusted code only.
 - Review new autofixes before applying them at scale.
 
 ## Credits
 
 Responsible disclosure is appreciated. Reporters can be credited in release notes if requested.
+

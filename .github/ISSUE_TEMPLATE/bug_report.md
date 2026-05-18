@@ -1,6 +1,6 @@
 ---
 name: Bug report
-about: Report a reproducible bug in stylelint-plugin-docusaurus
+about: Report a reproducible bug in stylelint-plugin-css-performance-budget
 title: "Bug: "
 labels:
     - bug
@@ -51,9 +51,10 @@ assignees: []
 - Node.js version:
 - npm version:
 - Stylelint version:
-- `stylelint-plugin-docusaurus` version/commit:
+- `stylelint-plugin-css-performance-budget` version/commit:
 - OS:
 
 ## Additional context
 
 <!-- Add logs, screenshots, benchmark numbers, or related issues/PRs if helpful. -->
+

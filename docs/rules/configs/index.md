@@ -1,18 +1,14 @@
 ---
 title: Configs
-description: Shareable Stylelint configs exported by stylelint-plugin-docusaurus.
+description: Shareable Stylelint configs exported by stylelint-plugin-css-performance-budget.
 ---
 
 # Configs
 
-`stylelint-plugin-docusaurus` exports these shareable configs:
+`stylelint-plugin-css-performance-budget` exports these shareable configs:
 
-- `docusaurus-recommended`
-- `docusaurus-all`
-- `docusaurus-docs-safe`
+- `performance-budget-recommended`
+- `performance-budget-all`
+- `performance-budget-strict`
 
-Use them from `docusaurusPluginConfigs` or from `extends` subpath exports.
-
-`docusaurus-recommended` stays focused on broadly applicable, low-noise guardrails, while `docusaurus-all` additionally enables stricter opt-in rules such as `docusaurus/no-unscoped-content-element-overrides`, `docusaurus/no-unanchored-infima-subcomponent-selectors`, `docusaurus/no-navbar-breakpoint-desync`, `docusaurus/require-docsearch-color-mode-pairs`, and cascade-layer safety rules.
-
-`docusaurus-docs-safe` currently mirrors `docusaurus-recommended` and exists as a stable home for docs-surface guidance.
+Use them from `performanceBudgetPluginConfigs` or from `extends` subpath exports.

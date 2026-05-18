@@ -124,8 +124,7 @@ const optionalDetailAllowedParentHeadings = new Set([
 const defaultHelperDocPathPattern =
     /(^|\/)docs\/rules\/(?!overview\.md$|getting-started\.md$|presets\/)[^/]+\.md$/u;
 const defaultRuleCatalogIdLinePattern = /^> \*\*Rule catalog ID:\*\* R\d{3}$/u;
-const defaultPackageDocumentationLabelPattern =
-    /^[^\r\n]+ package documentation:$/mu;
+const defaultPackageDocumentationLabelSuffix = " package documentation:";
 const supportedPluginPackagePrefixes = ["eslint-plugin-", "stylelint-plugin-"];
 
 const packageMetadataCache = new Map();
@@ -289,6 +288,42 @@ const testPattern = (pattern, value) => {
 };
 
 /**
+ * @param {string} value
+ *
+ * @returns {boolean}
+ */
+const hasPackageDocumentationLabelLine = (value) =>
+    value
+        .split(/\r?\n/u)
+        .map((line) => line.trim())
+        .some(
+            (line) =>
+                line.length > defaultPackageDocumentationLabelSuffix.length &&
+                line.endsWith(defaultPackageDocumentationLabelSuffix)
+        );
+
+/**
+ * @param {string} value
+ *
+ * @returns {boolean}
+ */
+const hasMarkdownLink = (value) => {
+    const openBracketOffset = value.indexOf("[");
+
+    if (openBracketOffset === -1) {
+        return false;
+    }
+
+    const closeBracketOffset = value.indexOf("]", openBracketOffset + 1);
+
+    if (closeBracketOffset === -1 || value[closeBracketOffset + 1] !== "(") {
+        return false;
+    }
+
+    return value.indexOf(")", closeBracketOffset + 2) !== -1;
+};
+
+/**
  * @param {unknown} value
  *
  * @returns {value is { value: string }}
@@ -411,8 +446,7 @@ export default function remarkLintRuleDocHeadings(options = {}) {
         options.requireRuleCatalogId ??
         options.ruleCatalogIdLinePattern !== undefined;
     const packageDocumentationLabelPattern =
-        options.packageDocumentationLabelPattern ??
-        defaultPackageDocumentationLabelPattern;
+        options.packageDocumentationLabelPattern;
     const ruleCatalogIdLinePattern =
         options.ruleCatalogIdLinePattern ?? defaultRuleCatalogIdLinePattern;
     /** @param {keyof typeof defaultHeadingToggles} headingKey */
@@ -721,11 +755,7 @@ export default function remarkLintRuleDocHeadings(options = {}) {
                 nextH2Heading
             );
 
-            if (
-                !/\[[^\]]+\]\([^)]+\)/u.test(
-                    stripMarkdownCode(deprecatedSectionContent)
-                )
-            ) {
+            if (!hasMarkdownLink(stripMarkdownCode(deprecatedSectionContent))) {
                 file.message(
                     "`## Deprecated` should include a link to the recommended replacement rule or package.",
                     deprecatedSectionHeading,
@@ -768,10 +798,14 @@ export default function remarkLintRuleDocHeadings(options = {}) {
                 );
 
                 if (
-                    !testPattern(
-                        packageDocumentationLabelPattern,
-                        stripMarkdownCode(packageDocumentationContent)
-                    )
+                    !(packageDocumentationLabelPattern instanceof RegExp
+                        ? testPattern(
+                              packageDocumentationLabelPattern,
+                              stripMarkdownCode(packageDocumentationContent)
+                          )
+                        : hasPackageDocumentationLabelLine(
+                              stripMarkdownCode(packageDocumentationContent)
+                          ))
                 ) {
                     file.message(
                         "`## Package documentation` must include at least one `<package> package documentation:` label line.",

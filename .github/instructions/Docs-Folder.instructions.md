@@ -143,7 +143,7 @@ Unscoped theme-token usage makes large Docusaurus stylesheets harder to refactor
 ## Stylelint config example
 
 ```js
-import docusaurusPlugin, { configs } from "stylelint-plugin-docusaurus";
+import docusaurusPlugin, { configs } from "stylelint-plugin-css-performance-budget";
 
 export default {
   ...configs.recommended,
@@ -151,7 +151,7 @@ export default {
 };
 ```
 
-> Replace `stylelint-plugin-docusaurus`, `docusaurus`, and `no-theme-token-leaks` with the actual package name, namespace, and rule ID used in the target repository.
+> Replace `stylelint-plugin-css-performance-budget`, `docusaurus`, and `no-theme-token-leaks` with the actual package name, namespace, and rule ID used in the target repository.
 
 ## When not to use it
 
@@ -166,3 +166,4 @@ Disable this rule if the project intentionally consumes global Docusaurus theme 
 
   </examples>
 </instructions>
+
