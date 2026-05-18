@@ -4,6 +4,7 @@ import useBaseUrl from "@docusaurus/useBaseUrl";
 import Layout from "@theme/Layout";
 import Heading from "@theme/Heading";
 
+import GitHubStats from "../components/GitHubStats";
 import styles from "./index.module.css";
 
 type HeroBadge = Readonly<{
@@ -361,6 +362,9 @@ export default function Home() {
                             </div>
                         </aside>
                     </div>
+
+                    <GitHubStats className={styles.heroLiveBadges} />
+
                     <div className={styles["heroStats"]}>
                         {heroStats.map((stat) => (
                             <article

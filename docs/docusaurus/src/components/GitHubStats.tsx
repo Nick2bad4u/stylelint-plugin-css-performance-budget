@@ -1,0 +1,81 @@
+import Link from "@docusaurus/Link";
+
+import styles from "./GitHubStats.module.css";
+
+type GitHubStatsProps = {
+    readonly className?: string;
+};
+
+type LiveBadge = {
+    readonly alt: string;
+    readonly href: string;
+    readonly src: string;
+};
+
+const liveBadges = [
+    {
+        alt: "npm license",
+        href: "https://github.com/Nick2bad4u/stylelint-plugin-css-performance-budget/blob/main/LICENSE",
+        src: "https://flat.badgen.net/npm/license/stylelint-plugin-css-performance-budget?color=orange",
+    },
+    {
+        alt: "npm total downloads",
+        href: "https://www.npmjs.com/package/stylelint-plugin-css-performance-budget",
+        src: "https://flat.badgen.net/npm/dt/stylelint-plugin-css-performance-budget?color=yellow",
+    },
+    {
+        alt: "latest GitHub release",
+        href: "https://github.com/Nick2bad4u/stylelint-plugin-css-performance-budget/releases",
+        src: "https://flat.badgen.net/github/release/Nick2bad4u/stylelint-plugin-css-performance-budget?color=black",
+    },
+    {
+        alt: "GitHub stars",
+        href: "https://github.com/Nick2bad4u/stylelint-plugin-css-performance-budget/stargazers",
+        src: "https://flat.badgen.net/github/stars/Nick2bad4u/stylelint-plugin-css-performance-budget?color=purple",
+    },
+    {
+        alt: "GitHub forks",
+        href: "https://github.com/Nick2bad4u/stylelint-plugin-css-performance-budget/forks",
+        src: "https://flat.badgen.net/github/forks/Nick2bad4u/stylelint-plugin-css-performance-budget?color=green",
+    },
+    {
+        alt: "GitHub open issues",
+        href: "https://github.com/Nick2bad4u/stylelint-plugin-css-performance-budget/issues",
+        src: "https://flat.badgen.net/github/open-issues/Nick2bad4u/stylelint-plugin-css-performance-budget?color=red",
+    },
+    {
+        alt: "Codecov coverage",
+        href: "https://codecov.io/gh/Nick2bad4u/stylelint-plugin-css-performance-budget",
+        src: "https://flat.badgen.net/codecov/github/Nick2bad4u/stylelint-plugin-css-performance-budget?color=blue",
+    },
+] as const satisfies readonly LiveBadge[];
+
+/** Render live project badges on the docs homepage. */
+export default function GitHubStats({ className = "" }: GitHubStatsProps) {
+    const badgeListClassName = [styles.liveBadgeList, className]
+        .filter(Boolean)
+        .join(" ");
+
+    return (
+        <ul className={badgeListClassName}>
+            {liveBadges.map((badge) => (
+                <li key={badge.src} className={styles.liveBadgeListItem}>
+                    <Link
+                        className={styles.liveBadgeAnchor}
+                        href={badge.href}
+                        rel="noopener noreferrer"
+                        target="_blank"
+                    >
+                        <img
+                            alt={badge.alt}
+                            className={styles.liveBadgeImage}
+                            decoding="async"
+                            loading="lazy"
+                            src={badge.src}
+                        />
+                    </Link>
+                </li>
+            ))}
+        </ul>
+    );
+}
