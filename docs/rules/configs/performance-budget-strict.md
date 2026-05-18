@@ -1,11 +1,17 @@
 ---
-title: performance-budget-strict
+title: 🛡️ performance-budget-strict
 description: Strict CSS performance budget rule profile.
 ---
 
-# performance-budget-strict
+# 🛡️ performance-budget-strict
 
 Strict profile currently matching `performance-budget-all` for explicit policy signaling.
+
+Use this preset when review policy should say "strict" even while the current
+coverage intentionally matches
+[🟣 performance-budget-all](./performance-budget-all.md). For lower-noise
+adoption, start with
+[🟢 performance-budget-recommended](./performance-budget-recommended.md).
 
 ## Rules in this config
 

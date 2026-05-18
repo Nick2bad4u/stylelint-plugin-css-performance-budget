@@ -3,35 +3,43 @@ import type { SidebarsConfig } from "@docusaurus/plugin-content-docs";
 const sidebars = {
     rules: [
         {
+            className: "sb-doc-overview",
             id: "overview",
             label: "Overview",
             type: "doc",
         },
         {
+            className: "sb-doc-getting-started",
             id: "getting-started",
             label: "Getting Started",
             type: "doc",
         },
         {
+            className: "sb-cat-configs",
+            collapsed: false,
             items: [
                 {
+                    className: "sb-config-overview",
                     id: "configs/index",
                     label: "Config Overview",
                     type: "doc",
                 },
                 {
+                    className: "sb-config-recommended",
                     id: "configs/performance-budget-recommended",
-                    label: "performance-budget-recommended",
+                    label: "🟢 performance-budget-recommended",
                     type: "doc",
                 },
                 {
+                    className: "sb-config-all",
                     id: "configs/performance-budget-all",
-                    label: "performance-budget-all",
+                    label: "🟣 performance-budget-all",
                     type: "doc",
                 },
                 {
+                    className: "sb-config-strict",
                     id: "configs/performance-budget-strict",
-                    label: "performance-budget-strict",
+                    label: "🛡️ performance-budget-strict",
                     type: "doc",
                 },
             ],
@@ -39,6 +47,7 @@ const sidebars = {
             type: "category",
         },
         {
+            className: "sb-cat-guides",
             items: [
                 {
                     id: "guides/current-status",
@@ -50,6 +59,8 @@ const sidebars = {
             type: "category",
         },
         {
+            className: "sb-cat-rules",
+            collapsed: false,
             items: [
                 {
                     id: "no-heavy-selectors",

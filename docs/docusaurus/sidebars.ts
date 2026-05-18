@@ -21,11 +21,13 @@ const hasGeneratedApiDocs = (() => {
 const sidebars = {
     docs: [
         {
+            className: "sb-cat-developer",
             id: "developer/index",
             label: "Developer Docs",
             type: "doc",
         },
         {
+            className: "sb-doc-site-contract",
             id: "developer/docusaurus-site-contract",
             label: "Docs Site Contract",
             type: "doc",
@@ -33,6 +35,8 @@ const sidebars = {
         ...(hasGeneratedApiDocs
             ? [
                   {
+                      className: "sb-cat-api-runtime",
+                      collapsed: true,
                       items: [
                           {
                               dirName: "developer/api",

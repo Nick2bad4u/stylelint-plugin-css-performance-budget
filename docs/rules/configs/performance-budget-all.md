@@ -1,11 +1,17 @@
 ---
-title: performance-budget-all
+title: 🟣 performance-budget-all
 description: Full CSS performance budget rule profile.
 ---
 
-# performance-budget-all
+# 🟣 performance-budget-all
 
 Enables the complete public rule catalog.
+
+Use this preset for complete coverage. If you want the same current rule
+coverage under an explicitly stricter policy name, use
+[🛡️ performance-budget-strict](./performance-budget-strict.md). For lower-noise
+rollout, start with
+[🟢 performance-budget-recommended](./performance-budget-recommended.md).
 
 ## Rules in this config
 

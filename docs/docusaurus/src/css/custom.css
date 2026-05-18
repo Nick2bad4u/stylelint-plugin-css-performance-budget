@@ -23,63 +23,94 @@
 
 /* You can override the default Infima variables here. */
 
+/* stylelint-disable font/prefer-woff2, font/no-legacy-formats -- Nerd Fonts Symbols currently ships this CDN asset as TTF; keep it isolated to decorative icons. */
+@font-face {
+    font-family: "NerdFontSymbols Nerd Font Symbols";
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url("https://cdn.jsdelivr.net/gh/ryanoasis/nerd-fonts@3.4.0/patched-fonts/NerdFontsSymbolsOnly/SymbolsNerdFont-Regular.ttf")
+        format("truetype");
+}
+
+@font-face {
+    font-family: "Symbols Nerd Font Mono";
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url("https://cdn.jsdelivr.net/gh/ryanoasis/nerd-fonts@3.4.0/patched-fonts/NerdFontsSymbolsOnly/SymbolsNerdFontMono-Regular.ttf")
+        format("truetype");
+}
+/* stylelint-enable font/prefer-woff2, font/no-legacy-formats */
+
+.sb-nerd-font-symbols {
+    font-family:
+        "NerdFontSymbols Nerd Font Symbols", "Symbols Nerd Font", sans-serif,
+        system-ui;
+}
+
+.sb-nerd-font-symbols-mono {
+    font-family:
+        "Symbols Nerd Font Mono", "Symbols Nerd Font", monospace, system-ui;
+}
+
 :root {
-    --ifm-color-primary: #4f46e5;
-    --ifm-color-primary-dark: #4338ca;
-    --ifm-color-primary-darker: #3730a3;
-    --ifm-color-primary-darkest: #312e81;
-    --ifm-color-primary-light: #6366f1;
-    --ifm-color-primary-lighter: #818cf8;
-    --ifm-color-primary-lightest: #a5b4fc;
+    --ifm-color-primary: #c44900;
+    --ifm-color-primary-dark: #a43a00;
+    --ifm-color-primary-darker: #803000;
+    --ifm-color-primary-darkest: #5f2500;
+    --ifm-color-primary-light: #e85d04;
+    --ifm-color-primary-lighter: #ff7a1a;
+    --ifm-color-primary-lightest: #ffd166;
     --ifm-code-font-size: 95%;
     --ifm-font-family-base:
         "Inter var", "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
-    --sb-accent-overview: #22c55e;
-    --sb-accent-started: #0ea5e9;
-    --sb-accent-developer: #8b5cf6;
-    --sb-accent-developer-ops: #ec4899;
+    --sb-accent-overview: #b8f34a;
+    --sb-accent-started: #ff6a00;
+    --sb-accent-developer: #b45309;
+    --sb-accent-developer-ops: #ff3d81;
     --sb-accent-rules: #f97316;
     --sb-accent-presets: #eab308;
-    --sb-accent-guides: #06b6d4;
-    --sb-accent-api-overview: #6366f1;
-    --sb-accent-api-types: #14b8a6;
+    --sb-accent-guides: #d97706;
+    --sb-accent-api-overview: #e85d04;
+    --sb-accent-api-types: #a3e635;
     --sb-accent-api-runtime: #f43f5e;
-    --sb-accent-dev-charts: #38bdf8;
-    --sb-accent-dev-links: #10b981;
+    --sb-accent-dev-charts: #b8f34a;
+    --sb-accent-dev-links: #65a30d;
     --sb-accent-adr: #f59e0b;
-    --sb-accent-rules-guides: #22c55e;
-    --sb-accent-rules-catalog: #a855f7;
+    --sb-accent-rules-guides: #b8f34a;
+    --sb-accent-rules-catalog: #ff3d81;
     --sb-prefix-rule-number: #52525b;
     --sb-config-recommended: #facc15;
-    --sb-config-all: #a855f7;
+    --sb-config-all: #ff3d81;
 }
 
 [data-theme="dark"] {
-    --ifm-color-primary: #818cf8;
-    --ifm-color-primary-dark: #6366f1;
-    --ifm-color-primary-darker: #4f46e5;
-    --ifm-color-primary-darkest: #4338ca;
-    --ifm-color-primary-light: #a5b4fc;
-    --ifm-color-primary-lighter: #c7d2fe;
-    --ifm-color-primary-lightest: #e0e7ff;
-    --sb-accent-overview: #4ade80;
-    --sb-accent-started: #38bdf8;
-    --sb-accent-developer: #c084fc;
-    --sb-accent-developer-ops: #f472b6;
+    --ifm-color-primary: #ff7a1a;
+    --ifm-color-primary-dark: #e85d04;
+    --ifm-color-primary-darker: #c44900;
+    --ifm-color-primary-darkest: #a43a00;
+    --ifm-color-primary-light: #ffd166;
+    --ifm-color-primary-lighter: #ffe29a;
+    --ifm-color-primary-lightest: #fff2c2;
+    --sb-accent-overview: #d9f99d;
+    --sb-accent-started: #b8f34a;
+    --sb-accent-developer: #ff77aa;
+    --sb-accent-developer-ops: #ff8ab8;
     --sb-accent-rules: #fb923c;
     --sb-accent-presets: #facc15;
-    --sb-accent-guides: #67e8f9;
-    --sb-accent-api-overview: #a5b4fc;
-    --sb-accent-api-types: #2dd4bf;
+    --sb-accent-guides: #facc15;
+    --sb-accent-api-overview: #ffd166;
+    --sb-accent-api-types: #bef264;
     --sb-accent-api-runtime: #fb7185;
-    --sb-accent-dev-charts: #7dd3fc;
-    --sb-accent-dev-links: #34d399;
+    --sb-accent-dev-charts: #d9f99d;
+    --sb-accent-dev-links: #a3e635;
     --sb-accent-adr: #fbbf24;
-    --sb-accent-rules-guides: #4ade80;
-    --sb-accent-rules-catalog: #c084fc;
+    --sb-accent-rules-guides: #d9f99d;
+    --sb-accent-rules-catalog: #ff77aa;
     --sb-prefix-rule-number: #a1a1aa;
     --sb-config-recommended: #fde047;
-    --sb-config-all: #c084fc;
+    --sb-config-all: #ff77aa;
 }
 
 .navbar .dropdown__menu .navbar-dropdown-divider {
@@ -120,13 +151,13 @@
 
 .theme-doc-sidebar-menu .menu__link:hover,
 .theme-doc-sidebar-menu .menu__link:focus {
-    background-color: rgb(39 38 63 / 0.1);
+    background-color: rgb(61 31 15 / 0.1);
     text-decoration: none;
 }
 
 [data-theme="dark"] .theme-doc-sidebar-menu .menu__link:hover,
 [data-theme="dark"] .theme-doc-sidebar-menu .menu__link:focus {
-    background-color: rgb(129 140 248 / 20%);
+    background-color: rgb(255 106 0 / 18%);
 }
 
 .sb-doc-overview > .menu__link,
@@ -310,8 +341,8 @@
 
 .sb-cat-api-overview > .menu__list-item-collapsible .menu__link::before {
     content: "📘";
-    background-color: rgb(99 102 241 / 12%);
-    border: 1px solid rgb(99 102 241 / 40%);
+    background-color: rgb(255 106 0 / 12%);
+    border: 1px solid rgb(255 106 0 / 40%);
     color: var(--sb-accent-api-overview);
 }
 
@@ -373,7 +404,7 @@
 .sb-cat-api-overview:not(.menu__list-item--collapsed)
     > .menu__list-item-collapsible
     .menu__link {
-    box-shadow: inset 0 0 0 1px rgb(99 102 241 / 26%);
+    box-shadow: inset 0 0 0 1px rgb(255 106 0 / 26%);
 }
 
 .sb-cat-dev-links:not(.menu__list-item--collapsed)
@@ -407,37 +438,37 @@
 .sb-cat-guides
     .theme-doc-sidebar-item-link-level-3:nth-child(6n + 1)
     > .menu__link {
-    border-inline-start-color: #22c55e;
+    border-inline-start-color: #b8f34a;
 }
 
 .sb-cat-guides
     .theme-doc-sidebar-item-link-level-3:nth-child(6n + 2)
     > .menu__link {
-    border-inline-start-color: #14b8a6;
+    border-inline-start-color: #a3e635;
 }
 
 .sb-cat-guides
     .theme-doc-sidebar-item-link-level-3:nth-child(6n + 3)
     > .menu__link {
-    border-inline-start-color: #06b6d4;
+    border-inline-start-color: #d97706;
 }
 
 .sb-cat-guides
     .theme-doc-sidebar-item-link-level-3:nth-child(6n + 4)
     > .menu__link {
-    border-inline-start-color: #0ea5e9;
+    border-inline-start-color: #ff6a00;
 }
 
 .sb-cat-guides
     .theme-doc-sidebar-item-link-level-3:nth-child(6n + 5)
     > .menu__link {
-    border-inline-start-color: #84cc16;
+    border-inline-start-color: #a3e635;
 }
 
 .sb-cat-guides
     .theme-doc-sidebar-item-link-level-3:nth-child(6n)
     > .menu__link {
-    border-inline-start-color: #10b981;
+    border-inline-start-color: #65a30d;
 }
 
 /* Config palette */
@@ -595,7 +626,7 @@
 .sb-cat-api-types
     .theme-doc-sidebar-item-link-level-4:nth-child(4n + 1)
     > .menu__link {
-    border-inline-start-color: #17b7aa;
+    border-inline-start-color: #65a30d;
 }
 
 .sb-cat-api-types
@@ -607,7 +638,7 @@
 .sb-cat-api-types
     .theme-doc-sidebar-item-link-level-4:nth-child(4n + 2)
     > .menu__link {
-    border-inline-start-color: #2dd4bf;
+    border-inline-start-color: #bef264;
 }
 
 .sb-cat-api-types
@@ -619,7 +650,7 @@
 .sb-cat-api-types
     .theme-doc-sidebar-item-link-level-4:nth-child(4n + 3)
     > .menu__link {
-    border-inline-start-color: #0d9488;
+    border-inline-start-color: #4d7c0f;
 }
 
 .sb-cat-api-types
@@ -631,7 +662,7 @@
 .sb-cat-api-types
     .theme-doc-sidebar-item-link-level-4:nth-child(4n)
     > .menu__link {
-    border-inline-start-color: #0f766e;
+    border-inline-start-color: #365314;
 }
 
 /* API runtime palette */
@@ -714,7 +745,7 @@
 .sb-cat-dev-charts
     .theme-doc-sidebar-item-link-level-3:nth-child(4n + 1)
     > .menu__link {
-    border-inline-start-color: #38bdf8;
+    border-inline-start-color: #b8f34a;
 }
 
 .sb-cat-dev-charts
@@ -723,7 +754,7 @@
 .sb-cat-dev-charts
     .theme-doc-sidebar-item-link-level-3:nth-child(4n + 2)
     > .menu__link {
-    border-inline-start-color: #7dd3fc;
+    border-inline-start-color: #d9f99d;
 }
 
 .sb-cat-dev-charts
@@ -732,7 +763,7 @@
 .sb-cat-dev-charts
     .theme-doc-sidebar-item-link-level-3:nth-child(4n + 3)
     > .menu__link {
-    border-inline-start-color: #0369a1;
+    border-inline-start-color: #803000;
 }
 
 .sb-cat-dev-charts
@@ -741,7 +772,7 @@
 .sb-cat-dev-charts
     .theme-doc-sidebar-item-link-level-3:nth-child(4n)
     > .menu__link {
-    border-inline-start-color: #0284c7;
+    border-inline-start-color: #a43a00;
 }
 
 .sb-cat-configs .sb-config-recommended > .menu__link,
@@ -761,11 +792,71 @@
 }
 
 .token.jsdoc-tag {
-    color: #2563eb;
+    color: #ff6a00;
     font-style: normal;
     font-weight: 700;
 
     [data-theme="dark"] & {
-        color: #93c5fd;
+        color: #ffd166;
     }
+}
+
+/* CSS performance budget identity overrides. */
+.navbar,
+.footer--dark {
+    background: linear-gradient(90deg, #17120e, #3d1f0f 55%, #7a2f0d);
+}
+
+.navbar__brand {
+    font-weight: 850;
+    letter-spacing: -0.03em;
+}
+
+.navbar__logo img {
+    filter: drop-shadow(0 0 8px rgb(255 209 102 / 28%));
+}
+
+.menu__link--active,
+.menu__list-item-collapsible--active {
+    color: var(--ifm-color-primary-dark);
+}
+
+[data-theme="dark"] .menu__link--active,
+[data-theme="dark"] .menu__list-item-collapsible--active {
+    color: var(--ifm-color-primary-lightest);
+}
+
+.sb-cat-rules .theme-doc-sidebar-item-link-level-2 > .menu__link:nth-child(n),
+.sb-cat-rules .menu__list .menu__link {
+    border-inline-start: 3px solid rgb(255 106 0 / 42%);
+    border-radius: 0.42rem;
+    padding-inline-start: calc(var(--ifm-menu-link-padding-horizontal) - 3px);
+}
+
+.sb-cat-rules
+    .theme-doc-sidebar-item-link-level-2:nth-child(5n + 1)
+    > .menu__link {
+    border-inline-start-color: #ff6a00;
+}
+
+.sb-cat-rules
+    .theme-doc-sidebar-item-link-level-2:nth-child(5n + 2)
+    > .menu__link {
+    border-inline-start-color: #ffd166;
+}
+
+.sb-cat-rules
+    .theme-doc-sidebar-item-link-level-2:nth-child(5n + 3)
+    > .menu__link {
+    border-inline-start-color: #b8f34a;
+}
+
+.sb-cat-rules
+    .theme-doc-sidebar-item-link-level-2:nth-child(5n + 4)
+    > .menu__link {
+    border-inline-start-color: #ff3d81;
+}
+
+.sb-cat-rules .theme-doc-sidebar-item-link-level-2:nth-child(5n) > .menu__link {
+    border-inline-start-color: #a43a00;
 }

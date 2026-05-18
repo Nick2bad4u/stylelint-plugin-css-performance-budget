@@ -1,11 +1,15 @@
 ---
-title: performance-budget-recommended
+title: 🟢 performance-budget-recommended
 description: Recommended low-noise CSS performance budget rules.
 ---
 
-# performance-budget-recommended
+# 🟢 performance-budget-recommended
 
 Low-noise default profile for most codebases.
+
+Use this preset as the first adoption step before moving to
+[🛡️ performance-budget-strict](./performance-budget-strict.md) or auditing every
+rule with [🟣 performance-budget-all](./performance-budget-all.md).
 
 ## Rules in this config
 
