@@ -10,8 +10,10 @@ import * as noFixedBackgroundAttachmentModule from "../rules/no-fixed-background
 import * as noOversizedCssCustomPropertyValuesModule from "../rules/no-oversized-css-custom-property-values.js";
 import * as noRenderBlockingImportModule from "../rules/no-render-blocking-import.js";
 
-/** Advanced motion, positioning, and import-focused rules keyed by unqualified
-name. */
+/**
+ * Advanced motion, positioning, and import-focused rules keyed by unqualified
+ * name.
+ */
 export const advancedPerformanceBudgetRules: Readonly<
     Record<string, StylelintPluginRuleContract>
 > = {

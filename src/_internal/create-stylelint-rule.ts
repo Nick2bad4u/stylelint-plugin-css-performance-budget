@@ -76,10 +76,23 @@ export const createStylelintRule = <
         ...baseMeta,
         docs,
     };
+    const normalizedRule: RuleBase<P, S> = (
+        primaryOption,
+        secondaryOptions,
+        context
+    ) => {
+        const normalizedSecondaryOptions =
+            secondaryOptions ??
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- Stylelint omits secondary options for primary-only config values; rules in this template treat absence as an empty option object.
+            ({} as S);
+
+        return rule(primaryOption, normalizedSecondaryOptions, context);
+    };
+
     // Stylelint rule functions are augmented with static metadata fields.
     // The runtime shape is valid; this assertion aligns generic typing.
     // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- Stylelint augments rule functions with ruleName/messages/meta fields at runtime.
-    const typedRule = rule as Rule<P, S, M>;
+    const typedRule = normalizedRule as Rule<P, S, M>;
 
     typedRule.ruleName = ruleName;
     typedRule.messages = messages;
