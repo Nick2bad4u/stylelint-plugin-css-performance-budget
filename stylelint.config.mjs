@@ -16,37 +16,30 @@ const sharedRules =
         ? {}
         : Object.fromEntries(
               Object.entries(sharedConfig.rules).filter(
-                  ([ruleName]) =>
-                      typeof ruleName === "string" &&
-                      !ruleName.startsWith(docusaurusRulePrefix)
+                  ([ruleName]) => !ruleName.startsWith(docusaurusRulePrefix)
               )
           );
 
 const sharedOverrides = Array.isArray(sharedConfig.overrides)
     ? sharedConfig.overrides.map((override) => {
-          if (
-              typeof override !== "object" ||
-              override === null ||
-              !("rules" in override)
-          ) {
+          if (typeof override !== "object") {
               return override;
           }
 
           const overrideRules = override.rules;
 
-          if (typeof overrideRules !== "object" || overrideRules === null) {
-              return override;
-          }
-
           return {
               ...override,
-              rules: Object.fromEntries(
-                  Object.entries(overrideRules).filter(
-                      ([ruleName]) =>
-                          typeof ruleName === "string" &&
-                          !ruleName.startsWith(docusaurusRulePrefix)
-                  )
-              ),
+              ...(overrideRules === undefined
+                  ? {}
+                  : {
+                        rules: Object.fromEntries(
+                            Object.entries(overrideRules).filter(
+                                ([ruleName]) =>
+                                    !ruleName.startsWith(docusaurusRulePrefix)
+                            )
+                        ),
+                    }),
           };
       })
     : sharedConfig.overrides;
