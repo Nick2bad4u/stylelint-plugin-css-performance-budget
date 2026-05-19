@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 describe("docs stylelint guardrails", () => {
     it("keeps docs guardrail test script wired into release verification", () => {
         expect.hasAssertions();
+
         const packageJsonContents = nodeFs.readFileSync("package.json", "utf8");
 
         expect(packageJsonContents).toContain(
@@ -14,6 +15,7 @@ describe("docs stylelint guardrails", () => {
 
     it("keeps stylelint config delegated to the shared config", () => {
         expect.hasAssertions();
+
         const configFileContents = nodeFs.readFileSync(
             "stylelint.config.mjs",
             "utf8"
@@ -28,6 +30,7 @@ describe("docs stylelint guardrails", () => {
 
     it("does not reference the retired docusaurus plugin package name", () => {
         expect.hasAssertions();
+
         const packageJsonContents = nodeFs.readFileSync("package.json", "utf8");
         const retiredPluginPackageName = [
             "stylelint",

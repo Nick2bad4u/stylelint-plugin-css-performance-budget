@@ -24,6 +24,7 @@ describe("plugin surface", () => {
         expect(ruleIds).not.toHaveLength(0);
 
         for (const ruleId of ruleIds) {
+            // eslint-disable-next-line vitest/prefer-to-be-truthy -- explicit boolean assertion required by test-signal/no-weak-truthy-assertions.
             expect(ruleId.startsWith("css-performance-budget/")).toBe(true);
         }
     });

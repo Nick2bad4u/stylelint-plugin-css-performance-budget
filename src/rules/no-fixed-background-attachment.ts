@@ -62,12 +62,15 @@ const ruleFunction: RuleBase<boolean> = (primary) => (root, result) => {
     });
 };
 
-const rule: StylelintPluginRule<boolean, undefined, typeof messages> =
-    createStylelintRule<boolean, undefined, typeof messages>({
-        docs,
-        messages,
-        rule: ruleFunction,
-        ruleName,
-    });
+/** Public Stylelint rule definition exported by this module. */
+const rule: StylelintPluginRule<boolean, undefined> = createStylelintRule<
+    boolean,
+    undefined
+>({
+    docs,
+    messages,
+    rule: ruleFunction,
+    ruleName,
+});
 
 export default rule;

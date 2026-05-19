@@ -59,7 +59,7 @@ const ruleFunction: RuleBase<boolean, SecondaryOptions> =
             return;
         }
 
-        const maxSelectors = secondary?.maxSelectors ?? defaultMaxSelectors;
+        const maxSelectors = secondary.maxSelectors ?? defaultMaxSelectors;
 
         root.walkRules((ruleNode) => {
             const selectorCount = getSelectorListLength(ruleNode.selector);
@@ -78,8 +78,9 @@ const ruleFunction: RuleBase<boolean, SecondaryOptions> =
         });
     };
 
-const rule: StylelintPluginRule<boolean, SecondaryOptions, typeof messages> =
-    createStylelintRule<boolean, SecondaryOptions, typeof messages>({
+/** Public Stylelint rule definition exported by this module. */
+const rule: StylelintPluginRule<boolean, SecondaryOptions> =
+    createStylelintRule<boolean, SecondaryOptions>({
         docs,
         messages,
         rule: ruleFunction,

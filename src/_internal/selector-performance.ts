@@ -28,18 +28,10 @@ export function analyzeSelectorListComplexity(
         // eslint-disable-next-line n/no-sync -- postcss-selector-parser provides sync AST APIs only.
         const ast = selectorParser().astSync(selectorList);
 
-        return ast.nodes.flatMap((node) => {
-            if (node.type !== "selector") {
-                return [];
-            }
-
-            return [
-                {
-                    complexity: calculateSelectorComplexity(node),
-                    selectorText: node.toString(),
-                },
-            ];
-        });
+        return ast.nodes.map((node) => ({
+            complexity: calculateSelectorComplexity(node),
+            selectorText: node.toString(),
+        }));
     } catch {
         return [];
     }
@@ -50,15 +42,7 @@ export function getSelectorListLength(selectorList: string): number {
     try {
         // eslint-disable-next-line n/no-sync -- postcss-selector-parser provides sync AST APIs only.
         const ast = selectorParser().astSync(selectorList);
-        let selectorCount = 0;
-
-        for (const node of ast.nodes) {
-            if (node.type === "selector") {
-                selectorCount += 1;
-            }
-        }
-
-        return selectorCount;
+        return ast.nodes.length;
     } catch {
         return 0;
     }
@@ -72,9 +56,7 @@ export function selectorListContainsBroadGlobalSelector(
         // eslint-disable-next-line n/no-sync -- postcss-selector-parser provides sync AST APIs only.
         const ast = selectorParser().astSync(selectorList);
 
-        return ast.nodes.some(
-            (node) => node.type === "selector" && isBroadGlobalSelector(node)
-        );
+        return ast.nodes.some((node) => isBroadGlobalSelector(node));
     } catch {
         return false;
     }
@@ -128,38 +110,11 @@ function getNodeWeight(node: Readonly<Node>): number {
     }
 }
 
-function isBroadGlobalNode(node: Readonly<Node>): boolean {
-    if (node.type === "universal") {
-        return true;
-    }
-
-    if (node.type === "tag") {
-        return node.value === "body" || node.value === "html";
-    }
-
-    return node.type === "pseudo" && node.value === ":root";
-}
-
 function isBroadGlobalSelector(selectorNode: Readonly<Selector>): boolean {
-    let hasBroadGlobalNode = false;
-    let hasNarrowingNode = false;
-
-    selectorNode.walk((node) => {
-        if (isBroadGlobalNode(node)) {
-            hasBroadGlobalNode = true;
-            return;
-        }
-
-        if (isNarrowingSelectorNode(node)) {
-            hasNarrowingNode = true;
-        }
-    });
-
-    return hasBroadGlobalNode && !hasNarrowingNode;
-}
-
-function isNarrowingSelectorNode(node: Readonly<Node>): boolean {
+    const selectorText = selectorNode.toString();
     return (
-        node.type === "attribute" || node.type === "class" || node.type === "id"
+        selectorText.includes(":root") ||
+        /\b(?:body|html)\b/v.test(selectorText) ||
+        selectorText.includes("*")
     );
 }

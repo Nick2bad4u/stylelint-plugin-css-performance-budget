@@ -3,7 +3,7 @@
  * CSS value-analysis helpers for filter/backdrop performance rules.
  */
 
-import { isDefined, isFinite, stringSplit } from "ts-extras";
+import { isDefined, isFinite as isFiniteNumber, stringSplit } from "ts-extras";
 
 /** One parsed CSS function call, including normalized name and raw args text. */
 export type CssFunctionCall = Readonly<{
@@ -137,7 +137,7 @@ export function toPixels(lengthToken: string): number | undefined {
     const normalized = lengthToken.trim().toLowerCase();
     const parsed = parseLengthToken(normalized);
 
-    if (!isDefined(parsed) || !isFinite(parsed.value)) {
+    if (!isDefined(parsed) || !isFiniteNumber(parsed.value)) {
         return undefined;
     }
 
@@ -249,7 +249,7 @@ function parseLengthToken(token: string):
     | undefined {
     const parsed = Number.parseFloat(token);
 
-    if (!isFinite(parsed)) {
+    if (!isFiniteNumber(parsed)) {
         return undefined;
     }
 

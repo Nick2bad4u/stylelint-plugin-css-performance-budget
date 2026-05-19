@@ -59,8 +59,8 @@ const ruleFunction: RuleBase<boolean, SecondaryOptions> =
             return;
         }
 
-        const allowLayerImports = secondary?.allowLayerImports ?? false;
-        const ignoredUrlFragments = (secondary?.ignoreUrls ?? []).map((entry) =>
+        const allowLayerImports = secondary.allowLayerImports ?? false;
+        const ignoredUrlFragments = (secondary.ignoreUrls ?? []).map((entry) =>
             entry.toLowerCase()
         );
 
@@ -94,8 +94,9 @@ const ruleFunction: RuleBase<boolean, SecondaryOptions> =
         });
     };
 
-const rule: StylelintPluginRule<boolean, SecondaryOptions, typeof messages> =
-    createStylelintRule<boolean, SecondaryOptions, typeof messages>({
+/** Public Stylelint rule definition exported by this module. */
+const rule: StylelintPluginRule<boolean, SecondaryOptions> =
+    createStylelintRule<boolean, SecondaryOptions>({
         docs,
         messages,
         rule: ruleFunction,

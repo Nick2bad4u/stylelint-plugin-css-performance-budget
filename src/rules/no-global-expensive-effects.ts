@@ -39,6 +39,8 @@ type SecondaryOptions = Readonly<{
     ignoreProperties?: string[];
 }>;
 
+type StylelintReportResult = Readonly<Parameters<typeof report>[0]["result"]>;
+
 const isStringArray = (value: unknown): boolean =>
     Array.isArray(value) && value.every((entry) => typeof entry === "string");
 
@@ -65,7 +67,7 @@ const ruleFunction: RuleBase<boolean, SecondaryOptions> =
         }
 
         const ignoredProperties: ReadonlySet<string> = new Set(
-            (secondary?.ignoreProperties ?? []).map((entry) =>
+            (secondary.ignoreProperties ?? []).map((entry) =>
                 entry.toLowerCase()
             )
         );
@@ -79,8 +81,9 @@ const ruleFunction: RuleBase<boolean, SecondaryOptions> =
         });
     };
 
-const rule: StylelintPluginRule<boolean, SecondaryOptions, typeof messages> =
-    createStylelintRule<boolean, SecondaryOptions, typeof messages>({
+/** Public Stylelint rule definition exported by this module. */
+const rule: StylelintPluginRule<boolean, SecondaryOptions> =
+    createStylelintRule<boolean, SecondaryOptions>({
         docs,
         messages,
         rule: ruleFunction,
@@ -90,9 +93,9 @@ const rule: StylelintPluginRule<boolean, SecondaryOptions, typeof messages> =
 export default rule;
 
 function inspectRuleNode(
-    ruleNode: PostcssRule,
+    ruleNode: Readonly<PostcssRule>,
     ignoredProperties: ReadonlySet<string>,
-    result: Parameters<typeof report>[0]["result"]
+    result: StylelintReportResult
 ): void {
     ruleNode.walkDecls((declaration) => {
         const propertyName = declaration.prop.toLowerCase();

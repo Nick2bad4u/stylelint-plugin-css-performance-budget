@@ -86,20 +86,27 @@ const performanceBudgetRuleEntries: readonly PerformanceBudgetRuleEntry[] =
         return entries;
     })();
 
+function isPerformanceBudgetRuleId(
+    ruleId: string
+): ruleId is PerformanceBudgetRuleId {
+    return ruleId.startsWith(`${pluginNamespaceValue}/`);
+}
+
 /** Runtime plugin objects consumed by Stylelint's `plugins` array. */
 export const plugins: readonly StylelintPlugin[] =
     performanceBudgetRuleEntries.map(([, rule]) => rule);
 
 /** Fully-qualified rule IDs exported by this package. */
 export const ruleIds: readonly PerformanceBudgetRuleId[] =
-    performanceBudgetRuleEntries.map(
-        ([, rule]) => rule.ruleName as PerformanceBudgetRuleId
-    );
+    performanceBudgetRuleEntries
+        .map(([, rule]) => rule.ruleName)
+        .filter(isPerformanceBudgetRuleId);
 
 const recommendedRuleIds: readonly PerformanceBudgetRuleId[] =
     performanceBudgetRuleEntries
         .filter(([, rule]) => rule.docs.recommended)
-        .map(([, rule]) => rule.ruleName as PerformanceBudgetRuleId);
+        .map(([, rule]) => rule.ruleName)
+        .filter(isPerformanceBudgetRuleId);
 
 function createConfig(
     enabledRuleIds: readonly PerformanceBudgetRuleId[]

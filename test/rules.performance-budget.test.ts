@@ -8,6 +8,7 @@ import {
 describe("css-performance-budget rules", () => {
     it("reports heavy selectors", async () => {
         expect.hasAssertions();
+
         const result = await lintWithConfig({
             code: "#app .layout .card > ul li a span { color: red; }",
             config: {
@@ -24,6 +25,7 @@ describe("css-performance-budget rules", () => {
 
     it("reports giant selector lists", async () => {
         expect.hasAssertions();
+
         const result = await lintWithConfig({
             code: ".a, .b, .c, .d, .e { color: red; }",
             config: {
@@ -40,6 +42,7 @@ describe("css-performance-budget rules", () => {
 
     it("reports excessive filter effects", async () => {
         expect.hasAssertions();
+
         const result = await lintWithConfig({
             code: ".hero { filter: blur(12px) saturate(120%) contrast(110%); }",
             config: {
@@ -56,6 +59,7 @@ describe("css-performance-budget rules", () => {
 
     it("reports expensive animation properties", async () => {
         expect.hasAssertions();
+
         const result = await lintWithConfig({
             code: [
                 ".card { transition: all 160ms ease-out; }",
@@ -78,6 +82,7 @@ describe("css-performance-budget rules", () => {
 
     it("reports broad and expensive will-change targets", async () => {
         expect.hasAssertions();
+
         const result = await lintWithConfig({
             code: ".card { will-change: all, width, box-shadow; }",
             config: {
@@ -94,6 +99,7 @@ describe("css-performance-budget rules", () => {
 
     it("reports render-blocking css imports", async () => {
         expect.hasAssertions();
+
         const result = await lintWithConfig({
             code: '@import url("theme.css");\n.button { color: red; }',
             config: {
@@ -110,6 +116,7 @@ describe("css-performance-budget rules", () => {
 
     it("reports fixed background attachment", async () => {
         expect.hasAssertions();
+
         const result = await lintWithConfig({
             code: ".hero { background: url(hero.jpg) center / cover fixed; }",
             config: {
@@ -126,6 +133,7 @@ describe("css-performance-budget rules", () => {
 
     it("reports global expensive effects", async () => {
         expect.hasAssertions();
+
         const result = await lintWithConfig({
             code: "body { filter: blur(2px); }",
             config: {
@@ -142,6 +150,7 @@ describe("css-performance-budget rules", () => {
 
     it("reports oversized rendering custom properties", async () => {
         expect.hasAssertions();
+
         const result = await lintWithConfig({
             code: [
                 ":root {",
@@ -162,6 +171,7 @@ describe("css-performance-budget rules", () => {
 
     it("reports expensive positioning patterns", async () => {
         expect.hasAssertions();
+
         const result = await lintWithConfig({
             code: ".toolbar { position: sticky; top: 0; box-shadow: 0 8px 24px rgb(0 0 0 / 20%); }",
             config: {
@@ -178,6 +188,7 @@ describe("css-performance-budget rules", () => {
 
     it("reports expensive motion without reduced-motion override", async () => {
         expect.hasAssertions();
+
         const result = await lintWithConfig({
             code: ".drawer { transition: width 220ms ease; }",
             config: {
@@ -194,6 +205,7 @@ describe("css-performance-budget rules", () => {
 
     it("allows scoped low-cost animation targets", async () => {
         expect.hasAssertions();
+
         const result = await lintWithConfig({
             code: ".chip { transition: opacity 180ms ease, transform 180ms ease; }",
             config: {
@@ -210,6 +222,7 @@ describe("css-performance-budget rules", () => {
 
     it("allows narrow low-cost will-change usage", async () => {
         expect.hasAssertions();
+
         const result = await lintWithConfig({
             code: ".chip { will-change: transform, opacity; }",
             config: {
@@ -226,6 +239,7 @@ describe("css-performance-budget rules", () => {
 
     it("allows expensive motion with reduced-motion override", async () => {
         expect.hasAssertions();
+
         const result = await lintWithConfig({
             code: [
                 ".drawer { transition: width 220ms ease; }",
@@ -247,6 +261,7 @@ describe("css-performance-budget rules", () => {
 
     it("reports layout-thrashing properties", async () => {
         expect.hasAssertions();
+
         const result = await lintWithConfig({
             code: ".panel { width: 100%; }",
             config: {
@@ -263,6 +278,7 @@ describe("css-performance-budget rules", () => {
 
     it("reports paint-heavy declarations but allows reset values", async () => {
         expect.hasAssertions();
+
         const problemResult = await lintWithConfig({
             code: ".card { box-shadow: 0 12px 40px rgb(0 0 0 / 30%); }",
             config: {
@@ -290,6 +306,7 @@ describe("css-performance-budget rules", () => {
 
     it("does not report lightweight selectors", async () => {
         expect.hasAssertions();
+
         const result = await lintWithConfig({
             code: ".button { color: red; }",
             config: {

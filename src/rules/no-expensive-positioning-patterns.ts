@@ -76,12 +76,12 @@ const ruleFunction: RuleBase<boolean, SecondaryOptions> =
         }
 
         const ignoredProperties: ReadonlySet<string> = new Set(
-            (secondary?.ignoreProperties ?? []).map((entry) =>
+            (secondary.ignoreProperties ?? []).map((entry) =>
                 entry.toLowerCase()
             )
         );
         const positions: ReadonlySet<string> = new Set(
-            (secondary?.positions ?? [...defaultPositions]).map((entry) =>
+            (secondary.positions ?? [...defaultPositions]).map((entry) =>
                 entry.toLowerCase()
             )
         );
@@ -115,8 +115,9 @@ const ruleFunction: RuleBase<boolean, SecondaryOptions> =
         });
     };
 
-const rule: StylelintPluginRule<boolean, SecondaryOptions, typeof messages> =
-    createStylelintRule<boolean, SecondaryOptions, typeof messages>({
+/** Public Stylelint rule definition exported by this module. */
+const rule: StylelintPluginRule<boolean, SecondaryOptions> =
+    createStylelintRule<boolean, SecondaryOptions>({
         docs,
         messages,
         rule: ruleFunction,
@@ -126,7 +127,7 @@ const rule: StylelintPluginRule<boolean, SecondaryOptions, typeof messages> =
 export default rule;
 
 function getDirectPaintEffectDeclarations(
-    ruleNode: PostcssRule,
+    ruleNode: Readonly<PostcssRule>,
     ignoredProperties: ReadonlySet<string>
 ): readonly Declaration[] {
     const declarations: Declaration[] = [];
@@ -151,10 +152,10 @@ function getDirectPaintEffectDeclarations(
 }
 
 function getDirectPositionDeclaration(
-    ruleNode: PostcssRule,
+    ruleNode: Readonly<PostcssRule>,
     positions: ReadonlySet<string>
 ): Declaration | undefined {
-    return ruleNode.nodes?.find(
+    return ruleNode.nodes.find(
         (node): node is Declaration =>
             isDeclarationNode(node) &&
             node.prop.toLowerCase() === "position" &&
@@ -162,6 +163,6 @@ function getDirectPositionDeclaration(
     );
 }
 
-function isDeclarationNode(node: ChildNode): node is Declaration {
+function isDeclarationNode(node: Readonly<ChildNode>): node is Declaration {
     return node.type === "decl";
 }

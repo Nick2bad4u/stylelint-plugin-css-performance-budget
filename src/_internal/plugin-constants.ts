@@ -4,6 +4,9 @@
  */
 import type { ArrayValues } from "type-fest";
 
+import { objectHasOwn } from "ts-extras";
+
+// eslint-disable-next-line import-x/extensions -- ESM JSON import is intentional for runtime package metadata.
 import packageJson from "../../package.json" with { type: "json" };
 
 /** Public npm package name. */
@@ -28,17 +31,29 @@ export const CONFIG_NAMES = [
 /** Shareable config names exported by the plugin runtime. */
 export type PerformanceBudgetConfigName = ArrayValues<typeof CONFIG_NAMES>;
 
+type PackageMetadata = Readonly<{
+    version?: unknown;
+}>;
+
 function getPackageVersion(pkg: unknown): string {
     if (typeof pkg !== "object" || pkg === null) {
         return "0.0.0";
     }
 
-    const version = Reflect.get(pkg, "version");
+    if (!isPackageMetadata(pkg)) {
+        return "0.0.0";
+    }
+
+    const { version } = pkg;
 
     return typeof version === "string" ? version : "0.0.0";
 }
 
-/** Published package version resolved from `package.json`. */
+function isPackageMetadata(value: object): value is PackageMetadata {
+    return objectHasOwn(value, "version");
+}
+
+/** Semver version of this package used in docs metadata and release diagnostics. */
 export const PACKAGE_VERSION: string = getPackageVersion(packageJson);
 
 /** Create the canonical docs URL for one authored rule page. */

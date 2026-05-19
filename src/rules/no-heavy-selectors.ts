@@ -67,7 +67,7 @@ const ruleFunction: RuleBase<boolean, SecondaryOptions> =
             return;
         }
 
-        const maxComplexity = secondary?.maxComplexity ?? defaultMaxComplexity;
+        const maxComplexity = secondary.maxComplexity ?? defaultMaxComplexity;
 
         root.walkRules((ruleNode) => {
             for (const selectorComplexity of analyzeSelectorListComplexity(
@@ -90,8 +90,9 @@ const ruleFunction: RuleBase<boolean, SecondaryOptions> =
         });
     };
 
-const rule: StylelintPluginRule<boolean, SecondaryOptions, typeof messages> =
-    createStylelintRule<boolean, SecondaryOptions, typeof messages>({
+/** Public Stylelint rule definition exported by this module. */
+const rule: StylelintPluginRule<boolean, SecondaryOptions> =
+    createStylelintRule<boolean, SecondaryOptions>({
         docs,
         messages,
         rule: ruleFunction,

@@ -118,15 +118,15 @@ const ruleFunction: RuleBase<boolean, SecondaryOptions> =
             return;
         }
 
-        const checkExpensiveTargets = secondary?.checkExpensiveTargets ?? true;
-        const maxProperties = secondary?.maxProperties ?? defaultMaxProperties;
+        const checkExpensiveTargets = secondary.checkExpensiveTargets ?? true;
+        const maxProperties = secondary.maxProperties ?? defaultMaxProperties;
         const ignoredProperties: ReadonlySet<string> = new Set(
-            (secondary?.ignoreProperties ?? []).map((entry) =>
+            (secondary.ignoreProperties ?? []).map((entry) =>
                 entry.toLowerCase()
             )
         );
         const disallowKeywords: ReadonlySet<string> = new Set(
-            (secondary?.disallowKeywords ?? [...defaultDisallowKeywords]).map(
+            (secondary.disallowKeywords ?? [...defaultDisallowKeywords]).map(
                 (entry) => entry.toLowerCase()
             )
         );
@@ -191,8 +191,9 @@ const ruleFunction: RuleBase<boolean, SecondaryOptions> =
         });
     };
 
-const rule: StylelintPluginRule<boolean, SecondaryOptions, typeof messages> =
-    createStylelintRule<boolean, SecondaryOptions, typeof messages>({
+/** Public Stylelint rule definition exported by this module. */
+const rule: StylelintPluginRule<boolean, SecondaryOptions> =
+    createStylelintRule<boolean, SecondaryOptions>({
         docs,
         messages,
         rule: ruleFunction,

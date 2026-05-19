@@ -76,6 +76,9 @@ export const createStylelintRule = <
         ...baseMeta,
         docs,
     };
+    // Stylelint rule functions are augmented with static metadata fields.
+    // The runtime shape is valid; this assertion aligns generic typing.
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- Stylelint augments rule functions with ruleName/messages/meta fields at runtime.
     const typedRule = rule as Rule<P, S, M>;
 
     typedRule.ruleName = ruleName;

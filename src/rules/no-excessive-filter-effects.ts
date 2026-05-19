@@ -1,5 +1,5 @@
 import stylelint, { type RuleBase } from "stylelint";
-import { isFinite, setHas } from "ts-extras";
+import { isFinite as isFiniteNumber, setHas } from "ts-extras";
 
 import {
     createStylelintRule,
@@ -58,7 +58,7 @@ const defaultMaxBlurRadiusPx = 8;
 const defaultMaxFunctions = 2;
 
 const isPositiveNumber = (value: unknown): boolean =>
-    typeof value === "number" && isFinite(value) && value > 0;
+    typeof value === "number" && isFiniteNumber(value) && value > 0;
 
 const ruleFunction: RuleBase<boolean, SecondaryOptions> =
     (primary, secondary) => (root, result) => {
@@ -84,8 +84,8 @@ const ruleFunction: RuleBase<boolean, SecondaryOptions> =
         }
 
         const maxBlurRadiusPx =
-            secondary?.maxBlurRadiusPx ?? defaultMaxBlurRadiusPx;
-        const maxFunctions = secondary?.maxFunctions ?? defaultMaxFunctions;
+            secondary.maxBlurRadiusPx ?? defaultMaxBlurRadiusPx;
+        const maxFunctions = secondary.maxFunctions ?? defaultMaxFunctions;
 
         root.walkDecls((declaration) => {
             const propertyName = declaration.prop.toLowerCase();
@@ -130,8 +130,9 @@ const ruleFunction: RuleBase<boolean, SecondaryOptions> =
         });
     };
 
-const rule: StylelintPluginRule<boolean, SecondaryOptions, typeof messages> =
-    createStylelintRule<boolean, SecondaryOptions, typeof messages>({
+/** Public Stylelint rule definition exported by this module. */
+const rule: StylelintPluginRule<boolean, SecondaryOptions> =
+    createStylelintRule<boolean, SecondaryOptions>({
         docs,
         messages,
         rule: ruleFunction,

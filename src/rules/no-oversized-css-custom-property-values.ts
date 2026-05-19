@@ -83,8 +83,8 @@ const ruleFunction: RuleBase<boolean, SecondaryOptions> =
             return;
         }
 
-        const maxFunctions = secondary?.maxFunctions ?? defaultMaxFunctions;
-        const maxListItems = secondary?.maxListItems ?? defaultMaxListItems;
+        const maxFunctions = secondary.maxFunctions ?? defaultMaxFunctions;
+        const maxListItems = secondary.maxListItems ?? defaultMaxListItems;
 
         root.walkDecls((declaration) => {
             if (!declaration.prop.startsWith("--")) {
@@ -132,8 +132,9 @@ const ruleFunction: RuleBase<boolean, SecondaryOptions> =
         });
     };
 
-const rule: StylelintPluginRule<boolean, SecondaryOptions, typeof messages> =
-    createStylelintRule<boolean, SecondaryOptions, typeof messages>({
+/** Public Stylelint rule definition exported by this module. */
+const rule: StylelintPluginRule<boolean, SecondaryOptions> =
+    createStylelintRule<boolean, SecondaryOptions>({
         docs,
         messages,
         rule: ruleFunction,
