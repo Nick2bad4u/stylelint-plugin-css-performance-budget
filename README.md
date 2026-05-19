@@ -1,5 +1,9 @@
 # stylelint-plugin-css-performance-budget
 
+[![CI](https://github.com/Nick2bad4u/stylelint-plugin-css-performance-budget/actions/workflows/ci.yml/badge.svg)](https://github.com/Nick2bad4u/stylelint-plugin-css-performance-budget/actions/workflows/ci.yml)
+[![npm version](https://img.shields.io/npm/v/stylelint-plugin-css-performance-budget.svg)](https://www.npmjs.com/package/stylelint-plugin-css-performance-budget)
+[![codecov](https://codecov.io/gh/Nick2bad4u/stylelint-plugin-css-performance-budget/graph/badge.svg)](https://codecov.io/gh/Nick2bad4u/stylelint-plugin-css-performance-budget)
+
 Stylelint rules and shareable configs for CSS performance budgets.
 
 ## Why this plugin

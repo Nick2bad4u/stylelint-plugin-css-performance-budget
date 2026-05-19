@@ -363,7 +363,7 @@ export default function Home() {
                         </aside>
                     </div>
 
-                    <GitHubStats className={styles.heroLiveBadges} />
+                    <GitHubStats className={styles["heroLiveBadges"] ?? ""} />
 
                     <div className={styles["heroStats"]}>
                         {heroStats.map((stat) => (
