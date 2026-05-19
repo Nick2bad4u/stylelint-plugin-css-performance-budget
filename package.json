@@ -260,6 +260,7 @@
         "verify:readme-rules-table": "npm run build && npm run sync:readme-rules-table"
     },
     "overrides": {
+        "fflate": "0.8.2",
         "jsonc-eslint-parser": "$jsonc-eslint-parser"
     },
     "dependencies": {
