@@ -94,36 +94,12 @@ export function parseCssFunctionCalls(
         const maybeStart = value[index];
 
         if (isIdentifierStart(maybeStart)) {
-            let identifierEnd = index + 1;
+            const identifierEnd = readIdentifierEnd(value, index);
 
-            while (isIdentifierContinue(value[identifierEnd])) {
-                identifierEnd += 1;
-            }
-
-            const functionName = value.slice(index, identifierEnd);
-            const hasOpeningParenthesis = value[identifierEnd] === "(";
-
-            if (hasOpeningParenthesis) {
-                const parenthesized = readParenthesizedContent(
-                    value,
-                    identifierEnd
-                );
-
-                if (
-                    isDefined(parenthesized.content) &&
-                    isDefined(parenthesized.endOffset)
-                ) {
-                    calls.push({
-                        args: parenthesized.content,
-                        name: functionName.toLowerCase(),
-                    });
-                    index = parenthesized.endOffset + 1;
-                } else {
-                    index = identifierEnd + 1;
-                }
-            } else {
-                index = identifierEnd;
-            }
+            index =
+                value[identifierEnd] === "("
+                    ? appendCssFunctionCall(calls, value, index, identifierEnd)
+                    : identifierEnd;
         } else {
             index += 1;
         }
@@ -194,6 +170,32 @@ export function toPixels(lengthToken: string): number | undefined {
             return undefined;
         }
     }
+}
+
+function appendCssFunctionCall(
+    calls: CssFunctionCall[],
+    value: string,
+    identifierStart: number,
+    openParenthesisOffset: number
+): number {
+    const parenthesized = readParenthesizedContent(
+        value,
+        openParenthesisOffset
+    );
+
+    if (
+        !isDefined(parenthesized.content) ||
+        !isDefined(parenthesized.endOffset)
+    ) {
+        return openParenthesisOffset + 1;
+    }
+
+    calls.push({
+        args: parenthesized.content,
+        name: value.slice(identifierStart, openParenthesisOffset).toLowerCase(),
+    });
+
+    return parenthesized.endOffset + 1;
 }
 
 function getLengthTokens(value: string): readonly string[] {
@@ -309,6 +311,16 @@ function parseLengthToken(token: string):
     return undefined;
 }
 
+function readIdentifierEnd(value: string, identifierStart: number): number {
+    let identifierEnd = identifierStart + 1;
+
+    while (isIdentifierContinue(value[identifierEnd])) {
+        identifierEnd += 1;
+    }
+
+    return identifierEnd;
+}
+
 function readParenthesizedContent(
     value: string,
     openParenthesisOffset: number
@@ -323,14 +335,22 @@ function readParenthesizedContent(
     while (characterOffset < value.length) {
         const character = value[characterOffset];
 
-        if (character === "(") {
+        if (character !== "(" && character !== ")") {
+            characterOffset += 1;
+        } else if (character === "(") {
             depth += 1;
 
             if (contentStart === -1) {
                 contentStart = characterOffset + 1;
             }
-        } else if (character === ")") {
+
+            characterOffset += 1;
+        } else {
             depth -= 1;
+
+            if (depth < 0) {
+                return { content: undefined, endOffset: undefined };
+            }
 
             if (depth === 0) {
                 return {
@@ -342,12 +362,8 @@ function readParenthesizedContent(
                 };
             }
 
-            if (depth < 0) {
-                return { content: undefined, endOffset: undefined };
-            }
+            characterOffset += 1;
         }
-
-        characterOffset += 1;
     }
 
     return { content: undefined, endOffset: undefined };
