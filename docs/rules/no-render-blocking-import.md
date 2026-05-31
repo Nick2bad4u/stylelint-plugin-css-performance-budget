@@ -15,6 +15,11 @@ Warn on CSS `@import` rules that can delay stylesheet discovery and rendering.
 
 ## Rule options
 
+| Option              | Default | Why                                                                                    |
+| ------------------- | :-----: | -------------------------------------------------------------------------------------- |
+| `allowLayerImports` | `false` | Layered imports are still CSS imports, so they stay blocked unless explicitly allowed. |
+| `ignoreUrls`        |  `[]`   | Allows known import URLs during incremental migration.                                 |
+
 ```json
 {
  "css-performance-budget/no-render-blocking-import": [

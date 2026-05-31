@@ -15,6 +15,14 @@ stays quiet.
 
 ## Rule options
 
+| Option                  | Default | Why                                                                  |
+| ----------------------- | :-----: | -------------------------------------------------------------------- |
+| `ignoreProperties`      |  `[]`   | Allows approved paint-heavy properties in audit profiles.            |
+| `maxFilterBlurRadiusPx` |   `8`   | Catches static blur values that exceed the low-noise paint budget.   |
+| `maxFilterFunctions`    |   `2`   | Allows common filter pairs and catches long static filter stacks.    |
+| `maxShadowBlurRadiusPx` |  `24`   | Allows normal component elevation but flags large soft shadows.      |
+| `maxShadowLayers`       |   `1`   | Keeps ordinary single shadows quiet and flags layered paint effects. |
+
 ```json
 {
  "css-performance-budget/no-paint-heavy-declarations": [

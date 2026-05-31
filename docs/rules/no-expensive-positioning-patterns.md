@@ -15,6 +15,11 @@ Warn when `position: fixed` or `position: sticky` appears in the same rule as ex
 
 ## Rule options
 
+| Option             | Default               | Why                                                               |
+| ------------------ | --------------------- | ----------------------------------------------------------------- |
+| `ignoreProperties` | `[]`                  | Allows deliberate fixed or sticky paint effects after review.     |
+| `positions`        | `["fixed", "sticky"]` | Fixed and sticky layers are more likely to repaint during scroll. |
+
 ```json
 {
  "css-performance-budget/no-expensive-positioning-patterns": [

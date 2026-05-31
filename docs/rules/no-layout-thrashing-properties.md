@@ -14,6 +14,11 @@ the browser recalculate layout repeatedly during motion.
 
 ## Rule options
 
+| Option             | Default | Why                                                              |
+| ------------------ | :-----: | ---------------------------------------------------------------- |
+| `checkKeyframes`   | `true`  | Layout-affecting keyframes can force layout work on every frame. |
+| `ignoreProperties` |  `[]`   | Allows project-approved layout motion targets.                   |
+
 ```json
 {
  "css-performance-budget/no-layout-thrashing-properties": [

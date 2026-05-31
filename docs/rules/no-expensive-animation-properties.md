@@ -22,6 +22,16 @@ transition without value evidence.
 
 ## Rule options
 
+| Option                  | Default | Why                                                                                   |
+| ----------------------- | :-----: | ------------------------------------------------------------------------------------- |
+| `allowTransitionAll`    | `false` | `transition: all` hides future expensive targets and should be explicit.              |
+| `checkKeyframes`        | `true`  | Keyframes can force paint or compositing work on every animation frame.               |
+| `ignoreProperties`      |  `[]`   | Provides a project escape hatch for approved transition or keyframe targets.          |
+| `maxFilterBlurRadiusPx` |   `8`   | Catches transitioned or keyframed blur values that exceed the low-noise paint budget. |
+| `maxFilterFunctions`    |   `2`   | Allows common filter pairs and catches animated filter stacks.                        |
+| `maxShadowBlurRadiusPx` |  `24`   | Allows normal component elevation but flags large animated shadows.                   |
+| `maxShadowLayers`       |   `1`   | Keeps ordinary single shadows quiet and flags layered animated paint effects.         |
+
 ```json
 {
  "css-performance-budget/no-expensive-animation-properties": [

@@ -30,7 +30,7 @@ rule-by-rule rollout guidance.
 | [`no-heavy-selectors`](../no-heavy-selectors.md)                                                           |       No       |    Yes    |  Yes   |
 | [`no-layout-thrashing-properties`](../no-layout-thrashing-properties.md)                                   |      Yes       |    Yes    |  Yes   |
 | [`no-oversized-css-custom-property-values`](../no-oversized-css-custom-property-values.md)                 |       No       |    Yes    |  Yes   |
-| [`no-paint-heavy-declarations`](../no-paint-heavy-declarations.md)                                         |      Yes       |    Yes    |  Yes   |
+| [`no-paint-heavy-declarations`](../no-paint-heavy-declarations.md)                                         |       No       |    Yes    |  Yes   |
 | [`no-render-blocking-import`](../no-render-blocking-import.md)                                             |      Yes       |    Yes    |  Yes   |
 | [`no-will-change-abuse`](../no-will-change-abuse.md)                                                       |      Yes       |    Yes    |  Yes   |
 | [`require-reduced-motion-for-expensive-animations`](../require-reduced-motion-for-expensive-animations.md) |       No       |    Yes    |  Yes   |

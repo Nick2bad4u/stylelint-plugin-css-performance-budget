@@ -15,6 +15,10 @@ Require a `prefers-reduced-motion: reduce` override when expensive transition or
 
 ## Rule options
 
+| Option             | Default | Why                                                                      |
+| ------------------ | :-----: | ------------------------------------------------------------------------ |
+| `ignoreProperties` |  `[]`   | Allows explicit exceptions where a project has reviewed motion behavior. |
+
 ```json
 {
  "css-performance-budget/require-reduced-motion-for-expensive-animations": [

@@ -14,6 +14,11 @@ Warn when CSS custom properties hide large shadow, filter, blur, or gradient val
 
 ## Rule options
 
+| Option         | Default | Why                                                                               |
+| -------------- | :-----: | --------------------------------------------------------------------------------- |
+| `maxFunctions` |   `4`   | Allows normal design tokens but catches tokens hiding large rendering pipelines.  |
+| `maxListItems` |   `4`   | Allows normal layered tokens but catches large shadow, filter, or gradient lists. |
+
 ```json
 {
  "css-performance-budget/no-oversized-css-custom-property-values": [

@@ -15,6 +15,10 @@ Warn when broad selectors such as `*`, `html`, `body`, or `:root` apply paint-he
 
 ## Rule options
 
+| Option             | Default | Why                                                                  |
+| ------------------ | :-----: | -------------------------------------------------------------------- |
+| `ignoreProperties` |  `[]`   | Allows intentional broad effects without weakening other properties. |
+
 ```json
 {
  "css-performance-budget/no-global-expensive-effects": [

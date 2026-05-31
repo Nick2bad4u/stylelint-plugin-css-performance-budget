@@ -15,6 +15,13 @@ Warn when `will-change` is used with broad keywords, too many targets, or expens
 
 ## Rule options
 
+| Option                  | Default                                  | Why                                                                                   |
+| ----------------------- | ---------------------------------------- | ------------------------------------------------------------------------------------- |
+| `checkExpensiveTargets` | `true`                                   | `will-change` should not pre-promote expensive layout or paint properties by default. |
+| `disallowKeywords`      | `["all", "contents", "scroll-position"]` | These keywords are too broad for production performance hints.                        |
+| `ignoreProperties`      | `[]`                                     | Allows reviewed project-specific will-change targets.                                 |
+| `maxProperties`         | `2`                                      | Keeps `will-change` focused on one or two concrete targets.                           |
+
 ```json
 {
  "css-performance-budget/no-will-change-abuse": [

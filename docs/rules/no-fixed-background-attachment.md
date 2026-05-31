@@ -14,6 +14,9 @@ Warn when `background-attachment: fixed` is used directly or through the `backgr
 
 ## Rule options
 
+This rule has no secondary options. It only checks for fixed background
+attachment patterns.
+
 ```json
 {
  "css-performance-budget/no-fixed-background-attachment": true
