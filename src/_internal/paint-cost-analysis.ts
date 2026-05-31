@@ -30,10 +30,10 @@ export type PaintCostThresholds = Readonly<{
 
 /** Default thresholds for low-noise paint value budget checks. */
 export const defaultPaintCostThresholds: PaintCostThresholds = {
-    maxFilterBlurRadiusPx: 8,
-    maxFilterFunctions: 2,
-    maxShadowBlurRadiusPx: 24,
-    maxShadowLayers: 1,
+    maxFilterBlurRadiusPx: 30,
+    maxFilterFunctions: 4,
+    maxShadowBlurRadiusPx: 48,
+    maxShadowLayers: 3,
 };
 
 const filterProperties: ReadonlySet<string> = new Set([

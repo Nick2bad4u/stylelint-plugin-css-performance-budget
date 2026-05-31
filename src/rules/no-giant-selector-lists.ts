@@ -33,7 +33,7 @@ type SecondaryOptions = Readonly<{
     maxSelectors?: number;
 }>;
 
-const defaultMaxSelectors = 4;
+const defaultMaxSelectors = 8;
 const isPositiveInteger = (value: unknown): boolean =>
     typeof value === "number" && isInteger(value) && value > 0;
 

@@ -9,12 +9,12 @@ Warn when selector complexity is above a configurable threshold.
 
 ## Rule options
 
-| Option          | Default | Why                                                                      |
-| --------------- | :-----: | ------------------------------------------------------------------------ |
-| `maxComplexity` |   `8`   | Allows normal component selectors while catching deep chained selectors. |
+| Option          | Default | Why                                                                          |
+| --------------- | :-----: | ---------------------------------------------------------------------------- |
+| `maxComplexity` |  `16`   | Allows normal application selectors while catching deeply chained selectors. |
 
 ```json
 {
- "css-performance-budget/no-heavy-selectors": [true, { "maxComplexity": 8 }]
+ "css-performance-budget/no-heavy-selectors": [true, { "maxComplexity": 16 }]
 }
 ```

@@ -41,7 +41,7 @@ type SecondaryOptions = Readonly<{
     maxComplexity?: number;
 }>;
 
-const defaultMaxComplexity = 8;
+const defaultMaxComplexity = 16;
 const isPositiveInteger = (value: unknown): boolean =>
     typeof value === "number" && isInteger(value) && value > 0;
 

@@ -10,7 +10,7 @@ describe("css-performance-budget rules", () => {
         expect.hasAssertions();
 
         const result = await lintWithConfig({
-            code: "#app .layout .card > ul li a span { color: red; }",
+            code: "#app .shell main .layout .region .card > ul.items li.item a.link span.label strong { color: red; }",
             config: {
                 rules: {
                     "css-performance-budget/no-heavy-selectors": true,
@@ -27,7 +27,7 @@ describe("css-performance-budget rules", () => {
         expect.hasAssertions();
 
         const result = await lintWithConfig({
-            code: ".a, .b, .c, .d, .e { color: red; }",
+            code: ".a, .b, .c, .d, .e, .f, .g, .h, .i { color: red; }",
             config: {
                 rules: {
                     "css-performance-budget/no-giant-selector-lists": true,
@@ -44,7 +44,7 @@ describe("css-performance-budget rules", () => {
         expect.hasAssertions();
 
         const result = await lintWithConfig({
-            code: ".hero { filter: blur(12px) saturate(120%) contrast(110%); }",
+            code: ".hero { filter: blur(36px) saturate(120%) contrast(110%) brightness(105%) grayscale(10%); }",
             config: {
                 rules: {
                     "css-performance-budget/no-excessive-filter-effects": true,
@@ -84,7 +84,7 @@ describe("css-performance-budget rules", () => {
         expect.hasAssertions();
 
         const result = await lintWithConfig({
-            code: ".card { will-change: all, width, box-shadow; }",
+            code: ".card { will-change: transform, opacity, width, height, filter, box-shadow; }",
             config: {
                 rules: {
                     "css-performance-budget/no-will-change-abuse": true,
@@ -154,7 +154,7 @@ describe("css-performance-budget rules", () => {
         const result = await lintWithConfig({
             code: [
                 ":root {",
-                "  --hero-shadow: 0 1px 2px black, 0 2px 4px black, 0 4px 8px black, 0 8px 16px black, 0 16px 32px black;",
+                "  --hero-shadow: 0 1px 2px black, 0 2px 4px black, 0 4px 8px black, 0 8px 16px black, 0 16px 32px black, 0 32px 40px black, 0 40px 48px black, 0 48px 56px black, 0 56px 64px black, 0 64px 72px black, 0 72px 80px black;",
                 "}",
             ].join("\n"),
             config: {
@@ -304,7 +304,7 @@ describe("css-performance-budget rules", () => {
         expect.hasAssertions();
 
         const problemResult = await lintWithConfig({
-            code: ".card { box-shadow: 0 12px 40px rgb(0 0 0 / 30%); }",
+            code: ".card { box-shadow: 0 12px 56px rgb(0 0 0 / 30%); }",
             config: {
                 rules: {
                     "css-performance-budget/no-paint-heavy-declarations": true,

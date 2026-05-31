@@ -37,8 +37,8 @@ type SecondaryOptions = Readonly<{
     maxListItems?: number;
 }>;
 
-const defaultMaxFunctions = 4;
-const defaultMaxListItems = 4;
+const defaultMaxFunctions = 8;
+const defaultMaxListItems = 10;
 const expensiveFunctionNames: ReadonlySet<string> = new Set([
     "blur",
     "conic-gradient",

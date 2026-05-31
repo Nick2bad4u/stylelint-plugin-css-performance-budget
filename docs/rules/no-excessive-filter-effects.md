@@ -9,16 +9,16 @@ Warn when `filter` and `backdrop-filter` values exceed safe function or blur thr
 
 ## Rule options
 
-| Option            | Default | Why                                                                                            |
-| ----------------- | :-----: | ---------------------------------------------------------------------------------------------- |
-| `maxBlurRadiusPx` |   `8`   | Flags expensive `blur()` and `drop-shadow()` blur radii while allowing small visual softening. |
-| `maxFunctions`    |   `2`   | Allows common filter pairs and catches long filter stacks.                                     |
+| Option            | Default | Why                                                                         |
+| ----------------- | :-----: | --------------------------------------------------------------------------- |
+| `maxBlurRadiusPx` |  `30`   | Allows moderate visual softening and catches unusually large blur effects.  |
+| `maxFunctions`    |   `4`   | Allows common filter stacks and catches unusually long rendering pipelines. |
 
 ```json
 {
  "css-performance-budget/no-excessive-filter-effects": [
   true,
-  { "maxFunctions": 2, "maxBlurRadiusPx": 8 }
+  { "maxFunctions": 4, "maxBlurRadiusPx": 30 }
  ]
 }
 ```

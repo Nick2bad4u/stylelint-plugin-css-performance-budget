@@ -41,7 +41,7 @@ type SecondaryOptions = Readonly<{
     maxProperties?: number;
 }>;
 
-const defaultMaxProperties = 2;
+const defaultMaxProperties = 5;
 const defaultDisallowKeywords: ReadonlySet<string> = new Set([
     "all",
     "contents",

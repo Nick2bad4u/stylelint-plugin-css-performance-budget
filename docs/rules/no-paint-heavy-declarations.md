@@ -15,13 +15,13 @@ stays quiet.
 
 ## Rule options
 
-| Option                  | Default | Why                                                                  |
-| ----------------------- | :-----: | -------------------------------------------------------------------- |
-| `ignoreProperties`      |  `[]`   | Allows approved paint-heavy properties in audit profiles.            |
-| `maxFilterBlurRadiusPx` |   `8`   | Catches static blur values that exceed the low-noise paint budget.   |
-| `maxFilterFunctions`    |   `2`   | Allows common filter pairs and catches long static filter stacks.    |
-| `maxShadowBlurRadiusPx` |  `24`   | Allows normal component elevation but flags large soft shadows.      |
-| `maxShadowLayers`       |   `1`   | Keeps ordinary single shadows quiet and flags layered paint effects. |
+| Option                  | Default | Why                                                                          |
+| ----------------------- | :-----: | ---------------------------------------------------------------------------- |
+| `ignoreProperties`      |  `[]`   | Allows approved paint-heavy properties in audit profiles.                    |
+| `maxFilterBlurRadiusPx` |  `30`   | Allows moderate static blur values and catches unusually large blur effects. |
+| `maxFilterFunctions`    |   `4`   | Allows common static filter stacks and catches unusually long pipelines.     |
+| `maxShadowBlurRadiusPx` |  `48`   | Allows larger component elevation but flags very large soft shadows.         |
+| `maxShadowLayers`       |   `3`   | Allows layered component shadows while catching excessive paint stacks.      |
 
 ```json
 {
@@ -29,10 +29,10 @@ stays quiet.
   true,
   {
    "ignoreProperties": ["box-shadow"],
-   "maxFilterBlurRadiusPx": 8,
-   "maxFilterFunctions": 2,
-   "maxShadowBlurRadiusPx": 24,
-   "maxShadowLayers": 1
+   "maxFilterBlurRadiusPx": 30,
+   "maxFilterFunctions": 4,
+   "maxShadowBlurRadiusPx": 48,
+   "maxShadowLayers": 3
   }
  ]
 }

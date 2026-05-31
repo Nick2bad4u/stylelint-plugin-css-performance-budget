@@ -54,8 +54,8 @@ const filterProperties = new Set([
     "filter",
 ]);
 
-const defaultMaxBlurRadiusPx = 8;
-const defaultMaxFunctions = 2;
+const defaultMaxBlurRadiusPx = 30;
+const defaultMaxFunctions = 4;
 
 const isPositiveNumber = (value: unknown): boolean =>
     typeof value === "number" && isFiniteNumber(value) && value > 0;

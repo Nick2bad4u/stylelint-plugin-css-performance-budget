@@ -9,12 +9,12 @@ Warn when a rule has too many comma-separated selectors.
 
 ## Rule options
 
-| Option         | Default | Why                                                                |
-| -------------- | :-----: | ------------------------------------------------------------------ |
-| `maxSelectors` |   `4`   | Allows small grouped selectors but flags oversized selector lists. |
+| Option         | Default | Why                                                                    |
+| -------------- | :-----: | ---------------------------------------------------------------------- |
+| `maxSelectors` |   `8`   | Allows practical grouped selectors but flags oversized selector lists. |
 
 ```json
 {
- "css-performance-budget/no-giant-selector-lists": [true, { "maxSelectors": 4 }]
+ "css-performance-budget/no-giant-selector-lists": [true, { "maxSelectors": 8 }]
 }
 ```

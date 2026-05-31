@@ -22,15 +22,15 @@ transition without value evidence.
 
 ## Rule options
 
-| Option                  | Default | Why                                                                                   |
-| ----------------------- | :-----: | ------------------------------------------------------------------------------------- |
-| `allowTransitionAll`    | `false` | `transition: all` hides future expensive targets and should be explicit.              |
-| `checkKeyframes`        | `true`  | Keyframes can force paint or compositing work on every animation frame.               |
-| `ignoreProperties`      |  `[]`   | Provides a project escape hatch for approved transition or keyframe targets.          |
-| `maxFilterBlurRadiusPx` |   `8`   | Catches transitioned or keyframed blur values that exceed the low-noise paint budget. |
-| `maxFilterFunctions`    |   `2`   | Allows common filter pairs and catches animated filter stacks.                        |
-| `maxShadowBlurRadiusPx` |  `24`   | Allows normal component elevation but flags large animated shadows.                   |
-| `maxShadowLayers`       |   `1`   | Keeps ordinary single shadows quiet and flags layered animated paint effects.         |
+| Option                  | Default | Why                                                                              |
+| ----------------------- | :-----: | -------------------------------------------------------------------------------- |
+| `allowTransitionAll`    | `false` | `transition: all` hides future expensive targets and should be explicit.         |
+| `checkKeyframes`        | `true`  | Keyframes can force paint or compositing work on every animation frame.          |
+| `ignoreProperties`      |  `[]`   | Provides a project escape hatch for approved transition or keyframe targets.     |
+| `maxFilterBlurRadiusPx` |  `30`   | Allows moderate animated blur values and catches unusually large blur effects.   |
+| `maxFilterFunctions`    |   `4`   | Allows common animated filter stacks and catches unusually long pipelines.       |
+| `maxShadowBlurRadiusPx` |  `48`   | Allows larger component elevation but flags very large animated shadows.         |
+| `maxShadowLayers`       |   `3`   | Allows layered component shadows while catching excessive animated paint stacks. |
 
 ```json
 {
@@ -40,10 +40,10 @@ transition without value evidence.
    "allowTransitionAll": false,
    "checkKeyframes": true,
    "ignoreProperties": ["box-shadow"],
-   "maxFilterBlurRadiusPx": 8,
-   "maxFilterFunctions": 2,
-   "maxShadowBlurRadiusPx": 24,
-   "maxShadowLayers": 1
+   "maxFilterBlurRadiusPx": 30,
+   "maxFilterFunctions": 4,
+   "maxShadowBlurRadiusPx": 48,
+   "maxShadowLayers": 3
   }
  ]
 }
