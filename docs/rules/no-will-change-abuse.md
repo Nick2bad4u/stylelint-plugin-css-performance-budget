@@ -17,14 +17,14 @@ Warn when `will-change` is used with broad keywords, too many targets, or expens
 
 ```json
 {
-  "css-performance-budget/no-will-change-abuse": [
-    true,
-    {
-      "maxProperties": 2,
-      "checkExpensiveTargets": true,
-      "disallowKeywords": ["all", "contents", "scroll-position"],
-      "ignoreProperties": ["background-position"]
-    }
-  ]
+ "css-performance-budget/no-will-change-abuse": [
+  true,
+  {
+   "maxProperties": 2,
+   "checkExpensiveTargets": true,
+   "disallowKeywords": ["all", "contents", "scroll-position"],
+   "ignoreProperties": ["background-position"]
+  }
+ ]
 }
 ```

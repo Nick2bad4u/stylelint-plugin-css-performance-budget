@@ -1,14 +1,28 @@
+import type { Declaration, Rule as PostcssRule } from "postcss";
+
 import stylelint, { type RuleBase } from "stylelint";
-import { isDefined, setHas, stringSplit } from "ts-extras";
+import {
+    arrayJoin,
+    isDefined,
+    isFinite as isFiniteNumber,
+    setHas,
+} from "ts-extras";
 
 import {
     createStylelintRule,
     type StylelintPluginRule,
 } from "../_internal/create-stylelint-rule.js";
 import {
+    defaultPaintCostThresholds,
+    getPaintCostReasons,
+    isAlwaysHighRiskPaintProperty,
+    type PaintCostThresholds,
+} from "../_internal/paint-cost-analysis.js";
+import {
     createRuleDocsUrl,
     createRuleName,
 } from "../_internal/plugin-constants.js";
+import { splitTopLevelValueList } from "../_internal/value-function-analysis.js";
 
 const { report, ruleMessages, validateOptions } = stylelint.utils;
 
@@ -17,25 +31,27 @@ const ruleName = createRuleName("no-expensive-animation-properties");
 const messages: {
     expensiveKeyframesProperty: (
         property: string,
-        keyframesName: string
+        keyframesName: string,
+        reason: string
     ) => string;
-    expensiveTransitionProperty: (property: string) => string;
+    expensiveTransitionProperty: (property: string, reason: string) => string;
     transitionAll: () => string;
 } = ruleMessages(ruleName, {
     expensiveKeyframesProperty: (
         property: string,
-        keyframesName: string
+        keyframesName: string,
+        reason: string
     ): string =>
-        `Keyframes "${keyframesName}" animates "${property}", which is usually expensive for layout or paint. Prefer transform/opacity when possible.`,
-    expensiveTransitionProperty: (property: string): string =>
-        `Transitioning "${property}" is usually expensive for layout or paint. Prefer transform/opacity-driven transitions when possible.`,
+        `Keyframes "${keyframesName}" animates paint-heavy property "${property}" (${reason}). Prefer transform/opacity when possible.`,
+    expensiveTransitionProperty: (property: string, reason: string): string =>
+        `Transitioning paint-heavy property "${property}" is expensive (${reason}). Prefer transform/opacity-driven transitions when possible.`,
     transitionAll: (): string =>
         "Avoid `transition: all`; scope transitions to specific low-cost properties such as transform or opacity.",
 });
 
 const docs = {
     description:
-        "Warn on expensive animation and transition targets, including `transition: all` and costly keyframe properties.",
+        "Warn on `transition: all` and transitions or keyframes that target high-cost paint effects.",
     recommended: true,
     url: createRuleDocsUrl("no-expensive-animation-properties"),
 } as const;
@@ -44,40 +60,24 @@ type SecondaryOptions = Readonly<{
     allowTransitionAll?: boolean;
     checkKeyframes?: boolean;
     ignoreProperties?: string[];
+    maxFilterBlurRadiusPx?: number;
+    maxFilterFunctions?: number;
+    maxShadowBlurRadiusPx?: number;
+    maxShadowLayers?: number;
 }>;
 
 const expensiveAnimationProperties: ReadonlySet<string> = new Set([
     "-webkit-backdrop-filter",
     "backdrop-filter",
-    "background-color",
     "background-position",
     "background-size",
-    "border-radius",
-    "bottom",
     "box-shadow",
     "clip-path",
     "filter",
-    "height",
-    "inset",
-    "left",
-    "margin",
-    "margin-bottom",
-    "margin-left",
-    "margin-right",
-    "margin-top",
-    "max-height",
-    "max-width",
-    "min-height",
-    "min-width",
-    "padding",
-    "padding-bottom",
-    "padding-left",
-    "padding-right",
-    "padding-top",
-    "right",
+    "mask",
+    "mask-image",
+    "mix-blend-mode",
     "text-shadow",
-    "top",
-    "width",
 ]);
 
 const isBoolean = (value: unknown): boolean => typeof value === "boolean";
@@ -102,6 +102,10 @@ const ruleFunction: RuleBase<boolean, SecondaryOptions> =
                             Array.isArray(value) &&
                             value.every((entry) => typeof entry === "string"),
                     ],
+                    maxFilterBlurRadiusPx: [isPositiveNumber],
+                    maxFilterFunctions: [isPositiveNumber],
+                    maxShadowBlurRadiusPx: [isPositiveNumber],
+                    maxShadowLayers: [isPositiveNumber],
                 },
             }
         );
@@ -117,6 +121,20 @@ const ruleFunction: RuleBase<boolean, SecondaryOptions> =
                 propertyName.toLowerCase()
             )
         );
+        const thresholds: PaintCostThresholds = {
+            maxFilterBlurRadiusPx:
+                secondary.maxFilterBlurRadiusPx ??
+                defaultPaintCostThresholds.maxFilterBlurRadiusPx,
+            maxFilterFunctions:
+                secondary.maxFilterFunctions ??
+                defaultPaintCostThresholds.maxFilterFunctions,
+            maxShadowBlurRadiusPx:
+                secondary.maxShadowBlurRadiusPx ??
+                defaultPaintCostThresholds.maxShadowBlurRadiusPx,
+            maxShadowLayers:
+                secondary.maxShadowLayers ??
+                defaultPaintCostThresholds.maxShadowLayers,
+        };
 
         root.walkDecls((declaration) => {
             const propertyName = declaration.prop.toLowerCase();
@@ -142,13 +160,24 @@ const ruleFunction: RuleBase<boolean, SecondaryOptions> =
                     !setHas<string, string>(ignoredProperties, target) &&
                     setHas<string, string>(expensiveAnimationProperties, target)
                 ) {
-                    report({
-                        message: messages.expensiveTransitionProperty(target),
-                        node: declaration,
-                        result,
-                        ruleName,
-                        word: declaration.prop,
-                    });
+                    const reason = getTransitionTargetReason(
+                        declaration,
+                        target,
+                        thresholds
+                    );
+
+                    if (isDefined(reason)) {
+                        report({
+                            message: messages.expensiveTransitionProperty(
+                                target,
+                                reason
+                            ),
+                            node: declaration,
+                            result,
+                            ruleName,
+                            word: declaration.prop,
+                        });
+                    }
                 }
             }
         });
@@ -179,16 +208,25 @@ const ruleFunction: RuleBase<boolean, SecondaryOptions> =
                         propertyName
                     )
                 ) {
-                    report({
-                        message: messages.expensiveKeyframesProperty(
-                            propertyName,
-                            keyframesName
-                        ),
-                        node: declaration,
-                        result,
-                        ruleName,
-                        word: declaration.prop,
-                    });
+                    const reason = getDeclarationPaintReason(
+                        propertyName,
+                        declaration.value,
+                        thresholds
+                    );
+
+                    if (isDefined(reason)) {
+                        report({
+                            message: messages.expensiveKeyframesProperty(
+                                propertyName,
+                                keyframesName,
+                                reason
+                            ),
+                            node: declaration,
+                            result,
+                            ruleName,
+                            word: declaration.prop,
+                        });
+                    }
                 }
             });
         });
@@ -205,6 +243,93 @@ const rule: StylelintPluginRule<boolean, SecondaryOptions> =
 
 export default rule;
 
+function formatPaintCostReason(
+    reason: Readonly<{
+        actual: number;
+        kind:
+            | "filter-blur"
+            | "filter-functions"
+            | "shadow-blur"
+            | "shadow-layers";
+        max: number;
+    }>
+): string {
+    switch (reason.kind) {
+        case "filter-blur": {
+            return `blur radius ${reason.actual}px is above ${reason.max}px`;
+        }
+        case "filter-functions": {
+            return `${reason.actual} filter functions is above ${reason.max}`;
+        }
+        case "shadow-blur": {
+            return `shadow blur radius ${reason.actual}px is above ${reason.max}px`;
+        }
+        case "shadow-layers": {
+            return `${reason.actual} shadow layers is above ${reason.max}`;
+        }
+        default: {
+            return "unknown paint cost";
+        }
+    }
+}
+
+function getDeclarationPaintReason(
+    propertyName: string,
+    value: string,
+    thresholds: PaintCostThresholds
+): string | undefined {
+    const reasons = getPaintCostReasons(propertyName, value, thresholds);
+
+    if (reasons.length > 0) {
+        return arrayJoin(
+            reasons.map((reason) => formatPaintCostReason(reason)),
+            "; "
+        );
+    }
+
+    return isHighRiskAnimationProperty(propertyName)
+        ? "high-cost compositing effect"
+        : undefined;
+}
+
+function getDirectSiblingDeclarationValue(
+    declaration: Readonly<Declaration>,
+    propertyName: string
+): string | undefined {
+    if (!isPostcssRuleNode(declaration.parent)) {
+        return undefined;
+    }
+
+    for (const node of declaration.parent.nodes) {
+        if (node.type === "decl" && node.prop.toLowerCase() === propertyName) {
+            return node.value;
+        }
+    }
+
+    return undefined;
+}
+
+function getTransitionTargetReason(
+    declaration: Readonly<Declaration>,
+    target: string,
+    thresholds: PaintCostThresholds
+): string | undefined {
+    const directTargetValue = getDirectSiblingDeclarationValue(
+        declaration,
+        target
+    );
+
+    if (isDefined(directTargetValue)) {
+        return getDeclarationPaintReason(target, directTargetValue, thresholds);
+    }
+
+    if (isHighRiskAnimationProperty(target)) {
+        return "high-cost compositing effect";
+    }
+
+    return undefined;
+}
+
 function getTransitionTargets(
     propertyName: string,
     value: string
@@ -213,7 +338,7 @@ function getTransitionTargets(
         propertyName === "transition-property" ||
         propertyName === "-webkit-transition-property"
     ) {
-        return stringSplit(value, ",")
+        return splitTopLevelValueList(value)
             .map((entry) => entry.trim().toLowerCase())
             .filter((entry) => entry.length > 0);
     }
@@ -222,7 +347,7 @@ function getTransitionTargets(
         propertyName === "transition" ||
         propertyName === "-webkit-transition"
     ) {
-        return stringSplit(value, ",")
+        return splitTopLevelValueList(value)
             .map((entry) => inferTransitionTarget(entry))
             .filter((entry) => entry.length > 0);
     }
@@ -247,6 +372,28 @@ function inferTransitionTarget(transitionSegment: string): string {
 
     // No explicit property token means shorthand defaults to `all`.
     return "all";
+}
+
+function isHighRiskAnimationProperty(propertyName: string): boolean {
+    switch (propertyName.toLowerCase()) {
+        case "background-position":
+        case "background-size": {
+            return true;
+        }
+        default: {
+            return isAlwaysHighRiskPaintProperty(propertyName);
+        }
+    }
+}
+
+function isPositiveNumber(value: unknown): boolean {
+    return typeof value === "number" && isFiniteNumber(value) && value > 0;
+}
+
+function isPostcssRuleNode(
+    node: Readonly<Declaration>["parent"]
+): node is PostcssRule {
+    return node?.type === "rule";
 }
 
 function isTimingFunctionKeyword(token: string): boolean {

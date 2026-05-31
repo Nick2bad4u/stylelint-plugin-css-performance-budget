@@ -17,9 +17,9 @@ Require a `prefers-reduced-motion: reduce` override when expensive transition or
 
 ```json
 {
-  "css-performance-budget/require-reduced-motion-for-expensive-animations": [
-    true,
-    { "ignoreProperties": ["background-color"] }
-  ]
+ "css-performance-budget/require-reduced-motion-for-expensive-animations": [
+  true,
+  { "ignoreProperties": ["background-color"] }
+ ]
 }
 ```

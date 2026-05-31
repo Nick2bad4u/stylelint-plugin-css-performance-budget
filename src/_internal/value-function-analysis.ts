@@ -132,9 +132,50 @@ export function parseCssFunctionCalls(
     return calls;
 }
 
+/**
+ * Split a comma-separated CSS value list while preserving commas inside
+ * functions.
+ */
+export function splitTopLevelValueList(value: string): readonly string[] {
+    const entries: string[] = [];
+    let entryStart = 0;
+    let parenthesisDepth = 0;
+
+    for (let index = 0; index < value.length; index += 1) {
+        const character = value[index];
+
+        if (character === "(") {
+            parenthesisDepth += 1;
+        } else if (character === ")") {
+            parenthesisDepth = Math.max(0, parenthesisDepth - 1);
+        } else if (character === "," && parenthesisDepth === 0) {
+            const entry = value.slice(entryStart, index).trim();
+
+            if (entry.length > 0) {
+                entries.push(entry);
+            }
+
+            entryStart = index + 1;
+        }
+    }
+
+    const finalEntry = value.slice(entryStart).trim();
+
+    if (finalEntry.length > 0) {
+        entries.push(finalEntry);
+    }
+
+    return entries;
+}
+
 /** Convert a CSS length token (`px`, `em`, `rem`) to px. */
 export function toPixels(lengthToken: string): number | undefined {
     const normalized = lengthToken.trim().toLowerCase();
+
+    if (normalized === "0") {
+        return 0;
+    }
+
     const parsed = parseLengthToken(normalized);
 
     if (!isDefined(parsed) || !isFiniteNumber(parsed.value)) {

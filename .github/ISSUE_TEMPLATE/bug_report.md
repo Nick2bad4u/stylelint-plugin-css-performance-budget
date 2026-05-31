@@ -3,8 +3,8 @@ name: Bug report
 about: Report a reproducible bug in stylelint-plugin-css-performance-budget
 title: "Bug: "
 labels:
-    - bug
-    - triage
+ - bug
+ - triage
 assignees: []
 ---
 
@@ -57,4 +57,3 @@ assignees: []
 ## Additional context
 
 <!-- Add logs, screenshots, benchmark numbers, or related issues/PRs if helpful. -->
-

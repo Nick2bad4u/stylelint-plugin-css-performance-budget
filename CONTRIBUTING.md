@@ -98,4 +98,3 @@ Use the process described in [SECURITY.md](./SECURITY.md).
 
 By contributing, you agree your contributions are licensed under the
 [MIT License](./LICENSE).
-

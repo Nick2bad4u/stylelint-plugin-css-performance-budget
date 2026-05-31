@@ -28,8 +28,8 @@ description: Overview of stylelint-plugin-css-performance-budget and its package
 - [oversized performance-sensitive custom property values](./no-oversized-css-custom-property-values.md)
 - [reduced-motion coverage for expensive motion](./require-reduced-motion-for-expensive-animations.md)
 - [broad or risky will-change usage](./no-will-change-abuse.md)
-- [layout-thrashing properties](./no-layout-thrashing-properties.md)
-- [paint-heavy declarations](./no-paint-heavy-declarations.md)
+- [layout-affecting motion targets](./no-layout-thrashing-properties.md)
+- [paint/compositing value budgets](./no-paint-heavy-declarations.md)
 
 ## Package exports
 

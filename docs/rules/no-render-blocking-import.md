@@ -17,12 +17,12 @@ Warn on CSS `@import` rules that can delay stylesheet discovery and rendering.
 
 ```json
 {
-  "css-performance-budget/no-render-blocking-import": [
-    true,
-    {
-      "allowLayerImports": false,
-      "ignoreUrls": ["fonts.googleapis.com"]
-    }
-  ]
+ "css-performance-budget/no-render-blocking-import": [
+  true,
+  {
+   "allowLayerImports": false,
+   "ignoreUrls": ["fonts.googleapis.com"]
+  }
+ ]
 }
 ```

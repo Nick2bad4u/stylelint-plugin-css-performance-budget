@@ -11,9 +11,9 @@ Warn when `filter` and `backdrop-filter` values exceed safe function or blur thr
 
 ```json
 {
-  "css-performance-budget/no-excessive-filter-effects": [
-    true,
-    { "maxFunctions": 2, "maxBlurRadiusPx": 8 }
-  ]
+ "css-performance-budget/no-excessive-filter-effects": [
+  true,
+  { "maxFunctions": 2, "maxBlurRadiusPx": 8 }
+ ]
 }
 ```

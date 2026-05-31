@@ -11,6 +11,6 @@ Warn when a rule has too many comma-separated selectors.
 
 ```json
 {
-  "css-performance-budget/no-giant-selector-lists": [true, { "maxSelectors": 4 }]
+ "css-performance-budget/no-giant-selector-lists": [true, { "maxSelectors": 4 }]
 }
 ```

@@ -17,12 +17,12 @@ Warn when `position: fixed` or `position: sticky` appears in the same rule as ex
 
 ```json
 {
-  "css-performance-budget/no-expensive-positioning-patterns": [
-    true,
-    {
-      "positions": ["fixed", "sticky"],
-      "ignoreProperties": ["box-shadow"]
-    }
-  ]
+ "css-performance-budget/no-expensive-positioning-patterns": [
+  true,
+  {
+   "positions": ["fixed", "sticky"],
+   "ignoreProperties": ["box-shadow"]
+  }
+ ]
 }
 ```

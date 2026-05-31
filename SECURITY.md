@@ -24,8 +24,8 @@ fixes.
 
 | Version | Supported |
 | ------- | --------- |
-| Latest  | ✅         |
-| Older   | ❌         |
+| Latest  | ✅        |
+| Older   | ❌        |
 
 ## Response Expectations
 
@@ -42,4 +42,3 @@ fixes.
 ## Credits
 
 Responsible disclosure is appreciated. Reporters can be credited in release notes if requested.
-

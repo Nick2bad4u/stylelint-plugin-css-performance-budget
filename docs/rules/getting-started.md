@@ -29,11 +29,11 @@ for the exact rule list, or compare all profiles in the
 import performanceBudgetPlugin from "stylelint-plugin-css-performance-budget";
 
 export default {
-    plugins: [...performanceBudgetPlugin],
-    rules: {
-        "css-performance-budget/no-layout-thrashing-properties": true,
-        "css-performance-budget/no-paint-heavy-declarations": true,
-    },
+ plugins: [...performanceBudgetPlugin],
+ rules: {
+  "css-performance-budget/no-layout-thrashing-properties": true,
+  "css-performance-budget/no-paint-heavy-declarations": true,
+ },
 };
 ```
 

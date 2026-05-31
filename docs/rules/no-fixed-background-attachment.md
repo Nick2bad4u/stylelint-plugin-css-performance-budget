@@ -16,6 +16,6 @@ Warn when `background-attachment: fixed` is used directly or through the `backgr
 
 ```json
 {
-  "css-performance-budget/no-fixed-background-attachment": true
+ "css-performance-budget/no-fixed-background-attachment": true
 }
 ```

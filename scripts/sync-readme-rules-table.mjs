@@ -8,6 +8,8 @@ import { readFile, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
+import { format as formatPrettier } from "prettier";
+
 import { escapeMarkdownTableCell } from "./_internal/escape-markdown-table-cell.mjs";
 
 /**
@@ -123,6 +125,10 @@ const detectLineEnding = (markdown) =>
  */
 const normalizeMarkdownLineEndings = (markdown, lineEnding) =>
     markdown.replaceAll(/\r?\n/gv, lineEnding);
+
+/** @param {string} markdown */
+const formatMarkdown = async (markdown) =>
+    `${(await formatPrettier(markdown, { parser: "markdown" })).trimEnd()}\n`;
 
 /** @param {string} markdown */
 const getReadmeRulesSectionBounds = (markdown) => {
@@ -308,7 +314,7 @@ export const syncReadmeRulesTable = async ({
         lineEnding
     );
     const nextRulesSection = normalizeMarkdownLineEndings(
-        generateReadmeRulesSectionFromRules(activeRules),
+        await formatMarkdown(generateReadmeRulesSectionFromRules(activeRules)),
         lineEnding
     );
     const nextReadme = replaceReadmeRulesSection(

@@ -11,6 +11,6 @@ Warn when selector complexity is above a configurable threshold.
 
 ```json
 {
-  "css-performance-budget/no-heavy-selectors": [true, { "maxComplexity": 8 }]
+ "css-performance-budget/no-heavy-selectors": [true, { "maxComplexity": 8 }]
 }
 ```

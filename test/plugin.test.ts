@@ -49,7 +49,6 @@ describe("plugin surface", () => {
             "css-performance-budget/no-fixed-background-attachment": true,
             "css-performance-budget/no-global-expensive-effects": true,
             "css-performance-budget/no-layout-thrashing-properties": true,
-            "css-performance-budget/no-paint-heavy-declarations": true,
             "css-performance-budget/no-render-blocking-import": true,
             "css-performance-budget/no-will-change-abuse": true,
         });

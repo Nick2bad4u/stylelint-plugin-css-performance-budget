@@ -17,9 +17,9 @@ Warn when broad selectors such as `*`, `html`, `body`, or `:root` apply paint-he
 
 ```json
 {
-  "css-performance-budget/no-global-expensive-effects": [
-    true,
-    { "ignoreProperties": ["text-shadow"] }
-  ]
+ "css-performance-budget/no-global-expensive-effects": [
+  true,
+  { "ignoreProperties": ["text-shadow"] }
+ ]
 }
 ```

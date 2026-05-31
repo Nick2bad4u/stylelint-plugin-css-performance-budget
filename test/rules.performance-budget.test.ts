@@ -259,11 +259,11 @@ describe("css-performance-budget rules", () => {
         );
     });
 
-    it("reports layout-thrashing properties", async () => {
+    it("reports layout-affecting transition targets", async () => {
         expect.hasAssertions();
 
         const result = await lintWithConfig({
-            code: ".panel { width: 100%; }",
+            code: ".panel { transition: width 180ms ease; }",
             config: {
                 rules: {
                     "css-performance-budget/no-layout-thrashing-properties": true,
@@ -276,7 +276,31 @@ describe("css-performance-budget rules", () => {
         );
     });
 
-    it("reports paint-heavy declarations but allows reset values", async () => {
+    it("allows static layout declarations", async () => {
+        expect.hasAssertions();
+
+        const result = await lintWithConfig({
+            code: [
+                ".panel {",
+                "  width: min(100%, 40rem);",
+                "  margin-block: 1rem;",
+                "  padding-inline-start: 1rem;",
+                "  inset: 0;",
+                "}",
+            ].join("\n"),
+            config: {
+                rules: {
+                    "css-performance-budget/no-layout-thrashing-properties": true,
+                },
+            },
+        });
+
+        expect(getWarningTexts(result).join("\n")).not.toContain(
+            "css-performance-budget/no-layout-thrashing-properties"
+        );
+    });
+
+    it("reports oversized paint-heavy declarations but allows ordinary and reset values", async () => {
         expect.hasAssertions();
 
         const problemResult = await lintWithConfig({
@@ -292,6 +316,19 @@ describe("css-performance-budget rules", () => {
             "css-performance-budget/no-paint-heavy-declarations"
         );
 
+        const ordinaryResult = await lintWithConfig({
+            code: ".card { box-shadow: 0 4px 12px rgb(0 0 0 / 20%); }",
+            config: {
+                rules: {
+                    "css-performance-budget/no-paint-heavy-declarations": true,
+                },
+            },
+        });
+
+        expect(getWarningTexts(ordinaryResult).join("\n")).not.toContain(
+            "css-performance-budget/no-paint-heavy-declarations"
+        );
+
         const resetResult = await lintWithConfig({
             code: ".card { box-shadow: none; }",
             config: {
@@ -302,6 +339,30 @@ describe("css-performance-budget rules", () => {
         });
 
         expect(resetResult.warnings).toHaveLength(0);
+    });
+
+    it("allows common low-cost transition targets by default", async () => {
+        expect.hasAssertions();
+
+        const result = await lintWithConfig({
+            code: [
+                ".link { transition: background-color 160ms ease; }",
+                ".icon { transition: filter 160ms ease; }",
+                ".card {",
+                "  box-shadow: 0 4px 12px rgb(0 0 0 / 20%);",
+                "  transition: box-shadow 160ms ease;",
+                "}",
+            ].join("\n"),
+            config: {
+                rules: {
+                    "css-performance-budget/no-expensive-animation-properties": true,
+                },
+            },
+        });
+
+        expect(getWarningTexts(result).join("\n")).not.toContain(
+            "css-performance-budget/no-expensive-animation-properties"
+        );
     });
 
     it("does not report lightweight selectors", async () => {

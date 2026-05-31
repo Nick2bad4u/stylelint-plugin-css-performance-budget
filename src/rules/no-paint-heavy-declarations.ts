@@ -1,10 +1,22 @@
 import stylelint, { type RuleBase } from "stylelint";
-import { setHas } from "ts-extras";
+import {
+    arrayJoin,
+    isEmpty,
+    isFinite as isFiniteNumber,
+    setHas,
+} from "ts-extras";
 
 import {
     createStylelintRule,
     type StylelintPluginRule,
 } from "../_internal/create-stylelint-rule.js";
+import {
+    defaultPaintCostThresholds,
+    getPaintCostReasons,
+    isAlwaysHighRiskPaintProperty,
+    type PaintCostThresholds,
+} from "../_internal/paint-cost-analysis.js";
+import { resetKeywords } from "../_internal/performance-value-sets.js";
 import {
     createRuleDocsUrl,
     createRuleName,
@@ -15,21 +27,25 @@ const { report, ruleMessages, validateOptions } = stylelint.utils;
 const ruleName = createRuleName("no-paint-heavy-declarations");
 
 const messages: {
-    paintHeavyProperty: (property: string) => string;
+    paintHeavyProperty: (property: string, reason: string) => string;
 } = ruleMessages(ruleName, {
-    paintHeavyProperty: (property: string): string =>
-        `Property "${property}" is paint-heavy. Prefer lighter alternatives or isolate usage to avoid frequent expensive repaints.`,
+    paintHeavyProperty: (property: string, reason: string): string =>
+        `Property "${property}" exceeds the paint budget (${reason}). Use a lighter effect, reduce the value, or isolate it from frequently repainted UI.`,
 });
 
 const docs = {
     description:
-        "Warn on declaration properties that are typically expensive for paint/compositing.",
-    recommended: true,
+        "Warn on declarations whose values exceed paint/compositing budgets.",
+    recommended: false,
     url: createRuleDocsUrl("no-paint-heavy-declarations"),
 } as const;
 
 type SecondaryOptions = Readonly<{
     ignoreProperties?: string[];
+    maxFilterBlurRadiusPx?: number;
+    maxFilterFunctions?: number;
+    maxShadowBlurRadiusPx?: number;
+    maxShadowLayers?: number;
 }>;
 
 const paintHeavyProperties = new Set([
@@ -44,12 +60,8 @@ const paintHeavyProperties = new Set([
     "text-shadow",
 ]);
 
-const resetValues = new Set([
-    "initial",
-    "none",
-    "revert",
-    "unset",
-]);
+const isPositiveNumber = (value: unknown): boolean =>
+    typeof value === "number" && isFiniteNumber(value) && value > 0;
 
 const ruleFunction: RuleBase<boolean, SecondaryOptions> =
     (primary, secondary) => (root, result) => {
@@ -69,6 +81,10 @@ const ruleFunction: RuleBase<boolean, SecondaryOptions> =
                             Array.isArray(value) &&
                             value.every((entry) => typeof entry === "string"),
                     ],
+                    maxFilterBlurRadiusPx: [isPositiveNumber],
+                    maxFilterFunctions: [isPositiveNumber],
+                    maxShadowBlurRadiusPx: [isPositiveNumber],
+                    maxShadowLayers: [isPositiveNumber],
                 },
             }
         );
@@ -82,6 +98,20 @@ const ruleFunction: RuleBase<boolean, SecondaryOptions> =
                 propertyName.toLowerCase()
             )
         );
+        const thresholds: PaintCostThresholds = {
+            maxFilterBlurRadiusPx:
+                secondary.maxFilterBlurRadiusPx ??
+                defaultPaintCostThresholds.maxFilterBlurRadiusPx,
+            maxFilterFunctions:
+                secondary.maxFilterFunctions ??
+                defaultPaintCostThresholds.maxFilterFunctions,
+            maxShadowBlurRadiusPx:
+                secondary.maxShadowBlurRadiusPx ??
+                defaultPaintCostThresholds.maxShadowBlurRadiusPx,
+            maxShadowLayers:
+                secondary.maxShadowLayers ??
+                defaultPaintCostThresholds.maxShadowLayers,
+        };
 
         root.walkDecls((declaration) => {
             const propertyName = declaration.prop.toLowerCase();
@@ -94,12 +124,35 @@ const ruleFunction: RuleBase<boolean, SecondaryOptions> =
                 return;
             }
 
-            if (setHas(resetValues, declaration.value.trim().toLowerCase())) {
+            const normalizedValue = declaration.value.trim().toLowerCase();
+
+            if (setHas(resetKeywords, normalizedValue)) {
                 return;
             }
 
+            const paintCostReasons = getPaintCostReasons(
+                propertyName,
+                declaration.value,
+                thresholds
+            );
+
+            if (
+                isEmpty(paintCostReasons) &&
+                !isAlwaysHighRiskPaintProperty(propertyName)
+            ) {
+                return;
+            }
+
+            const reason =
+                arrayJoin(
+                    paintCostReasons.map((paintCostReason) =>
+                        formatPaintCostReason(paintCostReason)
+                    ),
+                    "; "
+                ) || "high-cost compositing effect";
+
             report({
-                message: messages.paintHeavyProperty(propertyName),
+                message: messages.paintHeavyProperty(propertyName, reason),
                 node: declaration,
                 result,
                 ruleName,
@@ -118,3 +171,33 @@ const rule: StylelintPluginRule<boolean, SecondaryOptions> =
     });
 
 export default rule;
+
+function formatPaintCostReason(
+    reason: Readonly<{
+        actual: number;
+        kind:
+            | "filter-blur"
+            | "filter-functions"
+            | "shadow-blur"
+            | "shadow-layers";
+        max: number;
+    }>
+): string {
+    switch (reason.kind) {
+        case "filter-blur": {
+            return `blur radius ${reason.actual}px is above ${reason.max}px`;
+        }
+        case "filter-functions": {
+            return `${reason.actual} filter functions is above ${reason.max}`;
+        }
+        case "shadow-blur": {
+            return `shadow blur radius ${reason.actual}px is above ${reason.max}px`;
+        }
+        case "shadow-layers": {
+            return `${reason.actual} shadow layers is above ${reason.max}`;
+        }
+        default: {
+            return "unknown paint cost";
+        }
+    }
+}

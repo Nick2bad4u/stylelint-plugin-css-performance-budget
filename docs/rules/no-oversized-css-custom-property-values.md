@@ -16,12 +16,12 @@ Warn when CSS custom properties hide large shadow, filter, blur, or gradient val
 
 ```json
 {
-  "css-performance-budget/no-oversized-css-custom-property-values": [
-    true,
-    {
-      "maxFunctions": 4,
-      "maxListItems": 4
-    }
-  ]
+ "css-performance-budget/no-oversized-css-custom-property-values": [
+  true,
+  {
+   "maxFunctions": 4,
+   "maxListItems": 4
+  }
+ ]
 }
 ```
