@@ -23,7 +23,6 @@
 
 /* You can override the default Infima variables here. */
 
-/* stylelint-disable font/prefer-woff2, font/no-legacy-formats -- Nerd Fonts Symbols currently ships this CDN asset as TTF; keep it isolated to decorative icons. */
 @font-face {
     font-family: "NerdFontSymbols Nerd Font Symbols";
     font-style: normal;
@@ -41,8 +40,6 @@
     src: url("https://cdn.jsdelivr.net/gh/ryanoasis/nerd-fonts@3.4.0/patched-fonts/NerdFontsSymbolsOnly/SymbolsNerdFontMono-Regular.ttf")
         format("truetype");
 }
-/* stylelint-enable font/prefer-woff2, font/no-legacy-formats */
-
 .sb-nerd-font-symbols {
     font-family:
         "NerdFontSymbols Nerd Font Symbols", "Symbols Nerd Font", sans-serif,

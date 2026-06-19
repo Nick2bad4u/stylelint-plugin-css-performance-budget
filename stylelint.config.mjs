@@ -1,55 +1,65 @@
 import sharedConfig from "stylelint-config-nick2bad4u";
 
-const retiredDocusaurusConfigSegment = "/configs/docusaurus-";
-const docusaurusRulePrefix = "docusaurus/";
-
-const sharedExtends = Array.isArray(sharedConfig.extends)
+const unsupportedExtends = new Set([
+    "stylelint-plugin-container-query-sanity/configs/container-query-sanity-all",
+    "stylelint-plugin-docusaurus/configs/docusaurus-all",
+    "stylelint-plugin-font/configs/font-all",
+    "stylelint-plugin-grid/configs/grid-all",
+]);
+const unsupportedRulePrefixes = [
+    "container-query-sanity/",
+    "docusaurus/",
+    "font/",
+    "grid/",
+];
+const normalizedExtends = Array.isArray(sharedConfig.extends)
     ? sharedConfig.extends.filter(
-          (entry) =>
-              typeof entry === "string" &&
-              !entry.includes(retiredDocusaurusConfigSegment)
+          (entry) => typeof entry === "string" && !unsupportedExtends.has(entry)
       )
-    : sharedConfig.extends;
-
-const sharedRules =
-    sharedConfig.rules === undefined
-        ? {}
-        : Object.fromEntries(
-              Object.entries(sharedConfig.rules).filter(
-                  ([ruleName]) => !ruleName.startsWith(docusaurusRulePrefix)
-              )
-          );
-
-const sharedOverrides = Array.isArray(sharedConfig.overrides)
+    : [];
+const sharedRules = sharedConfig.rules ?? {};
+const normalizedRules = Object.fromEntries(
+    Object.entries(sharedRules).filter(([ruleName]) =>
+        unsupportedRulePrefixes.every((prefix) => !ruleName.startsWith(prefix))
+    )
+);
+const normalizedOverrides = Array.isArray(sharedConfig.overrides)
     ? sharedConfig.overrides.map((override) => {
-          if (typeof override !== "object") {
+          if (override.rules === undefined) {
               return override;
           }
 
-          const overrideRules = override.rules;
+          const overrideRules = Object.fromEntries(
+              Object.entries(override.rules).filter(([ruleName]) =>
+                  unsupportedRulePrefixes.every(
+                      (prefix) => !ruleName.startsWith(prefix)
+                  )
+              )
+          );
 
           return {
               ...override,
-              ...(overrideRules === undefined
-                  ? {}
-                  : {
-                        rules: Object.fromEntries(
-                            Object.entries(overrideRules).filter(
-                                ([ruleName]) =>
-                                    !ruleName.startsWith(docusaurusRulePrefix)
-                            )
-                        ),
-                    }),
+              rules: overrideRules,
           };
       })
     : sharedConfig.overrides;
+const projectOverrides = [
+    ...(normalizedOverrides ?? []),
+    {
+        files: ["docs/docusaurus/**/*.css"],
+        rules: {
+            "css-performance-budget/no-giant-selector-lists": null,
+            "css-performance-budget/no-paint-heavy-declarations": null,
+        },
+    },
+];
 
 /** @type {import("stylelint").Config} */
 const stylelintConfig = {
     ...sharedConfig,
-    ...(sharedExtends === undefined ? {} : { extends: sharedExtends }),
-    ...(sharedOverrides === undefined ? {} : { overrides: sharedOverrides }),
-    rules: sharedRules,
+    extends: normalizedExtends,
+    overrides: projectOverrides,
+    rules: normalizedRules,
 };
 
 export default stylelintConfig;
