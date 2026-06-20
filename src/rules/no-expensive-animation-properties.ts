@@ -446,9 +446,5 @@ function isTransitionPropertyToken(token: string): boolean {
         return false;
     }
 
-    if (token.startsWith("steps(")) {
-        return false;
-    }
-
-    return true;
+    return !token.startsWith("steps(");
 }
