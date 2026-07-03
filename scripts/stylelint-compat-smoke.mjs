@@ -206,12 +206,13 @@ const runStylelintCompatSmoke = async (argv = process.argv.slice(2)) => {
 
     assertBuiltSurface(esmModule, cjsModule);
 
-    const configs = /**
-     * @type {Record<
-     *     string,
-     *     { plugins: unknown[]; rules: Record<string, unknown> }
-     * >}
-     */ (toRecord(toRecord(esmModule)["performanceBudgetPluginConfigs"]));
+    const configs =
+        /**
+         * @type {Record<
+         *     string,
+         *     { plugins: unknown[]; rules: Record<string, unknown> }
+         * >}
+         */ (toRecord(toRecord(esmModule)["performanceBudgetPluginConfigs"]));
 
     await runScenario(stylelintRuntime, "recommended-config", {
         ...configs["performance-budget-recommended"],

@@ -37,9 +37,42 @@ const config = [
     },
 
     {
+        files: ["docs/docusaurus/site-docs/**/*.md", "docs/rules/**/*.md"],
+        rules: {
+            "markdown/no-multiple-h1": "off",
+        },
+    },
+
+    {
+        files: ["docs/docusaurus/sidebars.ts"],
+        rules: {
+            "security/detect-non-literal-fs-filename": "off",
+        },
+    },
+
+    {
+        files: ["**/*.toml"],
+        name: "Local Stable TOML Formatting",
+        rules: {
+            // Tombi 1.1.7 formats the same TOML differently on Windows and Linux.
+            "tombi/tombi": "off",
+        },
+    },
+
+    {
         files: ["src/**/*.ts"],
         rules: {
             "unicorn/consistent-boolean-name": "off",
+        },
+    },
+
+    {
+        files: [
+            "src/_internal/value-function-analysis.ts",
+            "src/rules/no-expensive-animation-properties.ts",
+        ],
+        rules: {
+            "@typescript-eslint/prefer-readonly-parameter-types": "off",
         },
     },
 
