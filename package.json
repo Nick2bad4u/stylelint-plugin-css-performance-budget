@@ -1,7 +1,7 @@
 {
     "$schema": "https://www.schemastore.org/package.json",
     "name": "stylelint-plugin-css-performance-budget",
-    "version": "2.0.5",
+    "version": "2.0.6",
     "private": false,
     "description": "Stylelint rules and shareable configs for CSS performance budgets.",
     "keywords": [
