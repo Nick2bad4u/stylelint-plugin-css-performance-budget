@@ -286,7 +286,10 @@ function isTokenDelimiter(character: string | undefined): boolean {
 
 function parseLengthToken(token: string):
     | Readonly<{
-          unit: "em" | "px" | "rem";
+          unit:
+              | "em"
+              | "px"
+              | "rem";
           value: number;
       }>
     | undefined {

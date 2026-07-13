@@ -16,7 +16,11 @@ import {
 /** One reason a declaration value exceeds a paint-cost budget. */
 export type PaintCostReason = Readonly<{
     actual: number;
-    kind: "filter-blur" | "filter-functions" | "shadow-blur" | "shadow-layers";
+    kind:
+        | "filter-blur"
+        | "filter-functions"
+        | "shadow-blur"
+        | "shadow-layers";
     max: number;
 }>;
 
