@@ -166,7 +166,17 @@ const ruleFunction: RuleBase<boolean, SecondaryOptions> =
             }
 
             for (const target of targets) {
-                if (setHas<string, string>(disallowKeywords, target)) {
+                const isReservedKeyword = setHas<string, string>(
+                    disallowKeywords,
+                    target
+                );
+                const isExpensiveTarget =
+                    !isReservedKeyword &&
+                    checkExpensiveTargets &&
+                    !setHas<string, string>(ignoredProperties, target) &&
+                    setHas<string, string>(expensiveTargets, target);
+
+                if (isReservedKeyword) {
                     report({
                         message: messages.reservedKeywordTarget(target),
                         node: declaration,
@@ -174,11 +184,9 @@ const ruleFunction: RuleBase<boolean, SecondaryOptions> =
                         ruleName,
                         word: target,
                     });
-                } else if (
-                    !setHas<string, string>(ignoredProperties, target) &&
-                    checkExpensiveTargets &&
-                    setHas<string, string>(expensiveTargets, target)
-                ) {
+                }
+
+                if (isExpensiveTarget) {
                     report({
                         message: messages.expensiveTarget(target),
                         node: declaration,

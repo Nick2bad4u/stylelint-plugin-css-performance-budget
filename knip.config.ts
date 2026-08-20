@@ -51,7 +51,6 @@ const knipConfig: KnipConfig = {
         "@stylelint.*",
         "@types.*",
         "eslint.*",
-        "madge",
         "postcss.*",
         "remark.*",
         "stylelint.*",
@@ -62,9 +61,7 @@ const knipConfig: KnipConfig = {
         // Items flagged by knip report (ignored to suppress false-positives / repo-local tools)
         "clsx",
         "react-github-btn",
-        "actionlint",
         "commitlint",
-        "gitleaks-secret-scanner",
         "htmlhint",
         "leasot",
         "markdown-link-check",

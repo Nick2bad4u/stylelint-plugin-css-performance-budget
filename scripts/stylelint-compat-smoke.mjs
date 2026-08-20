@@ -9,15 +9,15 @@
 import { isDeepStrictEqual } from "node:util";
 import { readFileSync } from "node:fs";
 import { createRequire } from "node:module";
+import { join, resolve } from "node:path";
 import process from "node:process";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 import pc from "picocolors";
 
 const expectedStylelintMajorArgumentPrefix = "--expect-stylelint-major=";
-const builtPluginCjsPath = fileURLToPath(
-    new URL("../dist/plugin.cjs", import.meta.url)
-);
+const pluginRootArgumentPrefix = "--plugin-root=";
+const defaultPluginRootPath = fileURLToPath(new URL("..", import.meta.url));
 
 /** @param {readonly string[]} argv */
 const parseExpectedStylelintMajor = (argv) => {
@@ -36,6 +36,25 @@ const parseExpectedStylelintMajor = (argv) => {
     }
 
     return Number.parseInt(value, 10);
+};
+
+/** @param {readonly string[]} argv */
+const parsePluginRootPath = (argv) => {
+    const argument = argv.find((entry) =>
+        entry.startsWith(pluginRootArgumentPrefix)
+    );
+
+    if (argument === undefined) {
+        return defaultPluginRootPath;
+    }
+
+    const value = argument.slice(pluginRootArgumentPrefix.length);
+
+    if (value.length === 0) {
+        throw new TypeError("The --plugin-root argument cannot be blank.");
+    }
+
+    return resolve(value);
 };
 
 /** @param {unknown} value */
@@ -62,8 +81,7 @@ const normalizeStylelintRuntime = (runtimeCandidate) => {
     throw new TypeError("Unable to load Stylelint runtime.");
 };
 
-const getStylelintRuntimeVersion = () => {
-    const requireFn = createRequire(import.meta.url);
+const getStylelintRuntimeVersion = (requireFn) => {
     const pkgPath = requireFn.resolve("stylelint/package.json");
     const pkg = JSON.parse(readFileSync(pkgPath, "utf8"));
 
@@ -120,10 +138,11 @@ const createSnapshot = (candidate) => {
     };
 };
 
-const loadBuiltSurface = async () => {
-    const esmModule = await import("../dist/plugin.js");
-    const requireFn = createRequire(import.meta.url);
-    const cjsModule = requireFn(builtPluginCjsPath);
+const loadBuiltSurface = async (pluginRootPath, requireFn) => {
+    const esmModule = await import(
+        pathToFileURL(join(pluginRootPath, "dist", "plugin.js")).href
+    );
+    const cjsModule = requireFn(join(pluginRootPath, "dist", "plugin.cjs"));
 
     return {
         cjsModule,
@@ -195,14 +214,19 @@ const runStylelintCompatSmoke = async (argv = process.argv.slice(2)) => {
     );
 
     const expectedMajor = parseExpectedStylelintMajor(argv);
-    const runtimeVersion = getStylelintRuntimeVersion();
+    const pluginRootPath = parsePluginRootPath(argv);
+    const requireFn = createRequire(join(pluginRootPath, "package.json"));
+    const runtimeVersion = getStylelintRuntimeVersion(requireFn);
 
     assertStylelintMajor(expectedMajor, runtimeVersion);
 
     const stylelintRuntime = normalizeStylelintRuntime(
-        await import("stylelint")
+        await import(pathToFileURL(requireFn.resolve("stylelint")).href)
     );
-    const { esmModule, cjsModule } = await loadBuiltSurface();
+    const { esmModule, cjsModule } = await loadBuiltSurface(
+        pluginRootPath,
+        requireFn
+    );
 
     assertBuiltSurface(esmModule, cjsModule);
 

@@ -828,7 +828,8 @@ node_modules/
 node_modules_backup/
 
 # NPM
-.npmrc
+**/.npmrc
+!/.npmrc
 
 # OhMyPosh
 !.vscode/OhMyPosh-Atomic-Custom.json
