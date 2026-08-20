@@ -24,11 +24,14 @@ export function parseNpmPackFilename(jsonText) {
         });
     }
 
-    const packRecords = Array.isArray(parsedValue)
-        ? parsedValue
-        : isRecord(parsedValue)
-          ? Object.values(parsedValue)
-          : [];
+    /** @type {unknown[]} */
+    let packRecords = [];
+
+    if (Array.isArray(parsedValue)) {
+        packRecords = parsedValue;
+    } else if (isRecord(parsedValue)) {
+        packRecords = Object.values(parsedValue);
+    }
 
     if (packRecords.length !== 1) {
         throw new TypeError(
