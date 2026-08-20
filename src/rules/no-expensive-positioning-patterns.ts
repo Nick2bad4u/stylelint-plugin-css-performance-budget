@@ -132,11 +132,15 @@ function getDirectPaintEffectDeclarations(
 ): readonly Declaration[] {
     const declarations: Declaration[] = [];
 
-    ruleNode.walkDecls((declaration) => {
+    ruleNode.each((childNode) => {
+        if (childNode.type !== "decl") {
+            return;
+        }
+
+        const declaration = childNode;
         const propertyName = declaration.prop.toLowerCase();
 
         if (
-            declaration.parent === ruleNode &&
             setHas<string, string>(paintEffectProperties, propertyName) &&
             !setHas<string, string>(ignoredProperties, propertyName) &&
             !setHas<string, string>(

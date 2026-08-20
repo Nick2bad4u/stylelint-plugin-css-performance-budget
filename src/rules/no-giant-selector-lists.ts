@@ -64,7 +64,7 @@ const ruleFunction: RuleBase<boolean, SecondaryOptions> =
         root.walkRules((ruleNode) => {
             const selectorCount = getSelectorListLength(ruleNode.selector);
 
-            if (selectorCount <= maxSelectors || selectorCount === 0) {
+            if (selectorCount === 0 || selectorCount <= maxSelectors) {
                 return;
             }
 

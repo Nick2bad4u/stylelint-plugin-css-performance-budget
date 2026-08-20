@@ -57,7 +57,15 @@ jobs:
                   cache-dependency-path: "package-lock.json"
 
             - name: "Install dependencies"
-              run: "npm ci --force"
+              run: |
+                  set -euo pipefail
+                  expected_npm=$(node -p "require('./package.json').packageManager.split('@').at(-1)")
+                  actual_npm=$(npm --version)
+                  test "$actual_npm" = "$expected_npm" || {
+                    echo "Expected npm ${expected_npm}, received ${actual_npm}." >&2
+                    exit 1
+                  }
+                  npm ci
 
             - name: "Build package"
               run: "npm run build"
@@ -66,7 +74,7 @@ jobs:
               run: "npm run typecheck"
 
             - name: "Run tests with coverage and JUnit report"
-              run: "npx vitest run --coverage --reporter=github-actions --reporter=dot --reporter=junit --outputFile=test-report.junit.xml --silent"
+              run: "npm run test:ci"
               env:
                   CI: "true"
                   MAX_THREADS: "1"
@@ -140,16 +148,33 @@ jobs:
                   node-version-file: ".node-version"
 
             - name: "Install dependencies"
-              run: "npm ci --force"
+              run: |
+                  set -euo pipefail
+                  expected_npm=$(node -p "require('./package.json').packageManager.split('@').at(-1)")
+                  actual_npm=$(npm --version)
+                  test "$actual_npm" = "$expected_npm" || {
+                    echo "Expected npm ${expected_npm}, received ${actual_npm}." >&2
+                    exit 1
+                  }
+                  npm ci
 
             - name: "Install Actionlint"
               env:
-                  GOBIN: "${{ runner.temp }}/actionlint/bin"
+                  ACTIONLINT_SHA256: "8aca8db96f1b94770f1b0d72b6dddcb1ebb8123cb3712530b08cc387b349a3d8"
+                  ACTIONLINT_VERSION: "1.7.12"
               run: |
                   set -euo pipefail
-                  mkdir -p "$GOBIN"
-                  go install github.com/rhysd/actionlint/cmd/actionlint@v1.7.12
-                  echo "$GOBIN" >> "$GITHUB_PATH"
+                  archive="${RUNNER_TEMP}/actionlint.tar.gz"
+                  install_dir="${RUNNER_TEMP}/actionlint/bin"
+                  curl --fail --location --silent --show-error \
+                    --output "$archive" \
+                    "https://github.com/rhysd/actionlint/releases/download/v${ACTIONLINT_VERSION}/actionlint_${ACTIONLINT_VERSION}_linux_x86_64.tar.gz"
+                  printf '%s  %s\n' "$ACTIONLINT_SHA256" "$archive" | sha256sum --check
+                  mkdir -p "$install_dir"
+                  tar -xzf "$archive" -C "$install_dir" actionlint
+                  chmod +x "$install_dir/actionlint"
+                  "$install_dir/actionlint" -version
+                  echo "$install_dir" >> "$GITHUB_PATH"
 
             - name: "Run full verification pipeline"
               run: "npm run release:verify"
