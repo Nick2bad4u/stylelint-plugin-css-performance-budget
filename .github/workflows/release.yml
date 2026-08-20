@@ -69,8 +69,15 @@ jobs:
               with:
                   node-version-file: ".node-version"
                   registry-url: "${{ env.NPM_REGISTRY_URL }}"
-                  cache: "npm"
-                  cache-dependency-path: "package-lock.json"
+
+            - name: "Install the repository npm version"
+              run: |
+                  set -euo pipefail
+                  expected_npm=$(node -p "require('./package.json').packageManager.split('@').at(-1)")
+                  test "$expected_npm" = "12.0.2"
+                  cd "$RUNNER_TEMP"
+                  npm install --global --ignore-scripts --no-audit --no-fund npm@12.0.2
+                  test "$(npm --version)" = "$expected_npm"
 
             - name: "Install dependencies with the repository npm policy"
               run: |
