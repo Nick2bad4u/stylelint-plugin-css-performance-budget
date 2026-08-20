@@ -10,7 +10,7 @@
 
 import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { dirname, join, resolve } from "node:path";
+import { dirname, join, posix, resolve, win32 } from "node:path";
 import process from "node:process";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { spawnSync } from "node:child_process";
@@ -49,18 +49,38 @@ const toError = (error, fallbackMessage) =>
  *     args: readonly string[];
  *     captureOutput?: boolean;
  *     command: string;
- *     shell: boolean;
  *     workingDirectory: string;
  * }>} CommandSpec
  */
 
-/** @param {string} [platform] */
-export const getNpmCommand = (platform = process.platform) =>
-    platform === "win32" ? "npm.cmd" : "npm";
+/**
+ * Resolve the npm CLI module supplied by the npm lifecycle environment. Calling
+ * the module through Node avoids the shell required by npm.cmd on Windows and
+ * keeps every path as an uninterpreted process argument.
+ *
+ * @param {NodeJS.ProcessEnv} [environment]
+ * @param {string} [platform]
+ */
+export const resolveNpmCliPath = (
+    environment = process.env,
+    platform = process.platform
+) => {
+    const npmCliPath = environment["npm_execpath"];
+    const isAbsolutePath =
+        typeof npmCliPath === "string" &&
+        (platform === "win32"
+            ? win32.isAbsolute(npmCliPath)
+            : posix.isAbsolute(npmCliPath));
+    const normalizedPath = npmCliPath?.replaceAll("\\", "/");
 
-/** @param {NodeJS.ProcessEnv} [environment] */
-export const getWindowsCommandShell = (environment = process.env) =>
-    environment["ComSpec"] ?? environment["COMSPEC"] ?? "cmd.exe";
+    if (!isAbsolutePath || normalizedPath?.split("/").at(-1) !== "npm-cli.js") {
+        throw new TypeError(
+            "npm_execpath must be an absolute path to npm-cli.js. Run this compatibility check through npm."
+        );
+    }
+
+    return npmCliPath;
+};
 
 /** @param {Readonly<{ argvEntry?: string; currentImportUrl: string }>} input */
 export const isDirectExecution = ({ argvEntry, currentImportUrl }) =>
@@ -69,7 +89,7 @@ export const isDirectExecution = ({ argvEntry, currentImportUrl }) =>
 /**
  * Execute one child process synchronously and fail on non-zero exits.
  *
- * @param {CommandSpec & { windowsCommandShell?: string }} input
+ * @param {CommandSpec} input
  *
  * @returns {string} Captured stdout, or an empty string when not requested.
  */
@@ -77,9 +97,7 @@ export function runCommand({
     args,
     captureOutput = false,
     command,
-    shell,
     workingDirectory,
-    windowsCommandShell = getWindowsCommandShell(),
 }) {
     const childProcessEnvironment = Object.fromEntries(
         Object.entries(process.env).filter(
@@ -102,20 +120,7 @@ export function runCommand({
         ),
         windowsHide: true,
     };
-    const shouldUseWindowsCommandShell = process.platform === "win32" && shell;
-    const result = shouldUseWindowsCommandShell
-        ? spawnSync(
-              windowsCommandShell,
-              [
-                  "/d",
-                  "/s",
-                  "/c",
-                  command,
-                  ...args,
-              ],
-              spawnOptions
-          )
-        : spawnSync(command, args, spawnOptions);
+    const result = spawnSync(command, args, spawnOptions);
 
     if (result.error !== undefined) {
         throw result.error;
@@ -134,8 +139,8 @@ export function runCommand({
 
 /**
  * @param {Readonly<{
- *     npmCommand: string;
- *     platform: string;
+ *     nodeCommand: string;
+ *     npmCliPath: string;
  *     tarballPath: string;
  *     workingDirectory: string;
  * }>} input
@@ -143,12 +148,13 @@ export function runCommand({
  * @returns {CommandSpec}
  */
 export const createConsumerInstallCommand = ({
-    npmCommand,
-    platform,
+    nodeCommand,
+    npmCliPath,
     tarballPath,
     workingDirectory,
 }) => ({
     args: [
+        npmCliPath,
         "install",
         "--ignore-scripts",
         "--no-audit",
@@ -157,8 +163,7 @@ export const createConsumerInstallCommand = ({
         "stylelint@^16",
         tarballPath,
     ],
-    command: npmCommand,
-    shell: platform === "win32",
+    command: nodeCommand,
     workingDirectory,
 });
 
@@ -168,25 +173,22 @@ export const createConsumerInstallCommand = ({
  * @param {Readonly<{
  *     mkdtempFn?: typeof mkdtemp;
  *     nodeCommand?: string;
- *     npmCommand?: string;
+ *     npmCliPath?: string;
  *     packageJsonPath?: string;
- *     platform?: string;
  *     readFileFn?: typeof readFile;
  *     repositoryRootPath?: string;
  *     rmFn?: typeof rm;
  *     runCommandFn?: typeof runCommand;
  *     stylelintCompatSmokeScriptPath?: string;
  *     tmpDirectoryPath?: string;
- *     windowsCommandShell?: string;
  *     writeFileFn?: typeof writeFile;
  * }>} [input]
  */
 export async function runStylelint16Compat({
     mkdtempFn = mkdtemp,
     nodeCommand = process.execPath,
-    npmCommand = getNpmCommand(),
+    npmCliPath = resolveNpmCliPath(),
     packageJsonPath: targetPackageJsonPath = packageJsonPath,
-    platform = process.platform,
     readFileFn = readFile,
     repositoryRootPath: targetRepositoryRootPath = repositoryRootPath,
     rmFn = rm,
@@ -194,7 +196,6 @@ export async function runStylelint16Compat({
     stylelintCompatSmokeScriptPath:
         targetSmokeScriptPath = stylelintCompatSmokeScriptPath,
     tmpDirectoryPath = tmpdir(),
-    windowsCommandShell = getWindowsCommandShell(),
     writeFileFn = writeFile,
 } = {}) {
     const consumerDirectory = await mkdtempFn(
@@ -216,14 +217,17 @@ export async function runStylelint16Compat({
         }
 
         runCommandFn({
-            args: ["run", "build"],
-            command: npmCommand,
-            shell: platform === "win32",
+            args: [
+                npmCliPath,
+                "run",
+                "build",
+            ],
+            command: nodeCommand,
             workingDirectory: targetRepositoryRootPath,
-            windowsCommandShell,
         });
         const packJson = runCommandFn({
             args: [
+                npmCliPath,
                 "pack",
                 "--json",
                 "--ignore-scripts",
@@ -231,10 +235,8 @@ export async function runStylelint16Compat({
                 consumerDirectory,
             ],
             captureOutput: true,
-            command: npmCommand,
-            shell: platform === "win32",
+            command: nodeCommand,
             workingDirectory: targetRepositoryRootPath,
-            windowsCommandShell,
         });
         const tarballPath = join(
             consumerDirectory,
@@ -248,12 +250,11 @@ export async function runStylelint16Compat({
         );
         runCommandFn({
             ...createConsumerInstallCommand({
-                npmCommand,
-                platform,
+                nodeCommand,
+                npmCliPath,
                 tarballPath,
                 workingDirectory: consumerDirectory,
             }),
-            windowsCommandShell,
         });
 
         const pluginRootPath = join(
@@ -268,9 +269,7 @@ export async function runStylelint16Compat({
                 `--plugin-root=${pluginRootPath}`,
             ],
             command: nodeCommand,
-            shell: false,
             workingDirectory: consumerDirectory,
-            windowsCommandShell,
         });
     } catch (error) {
         primaryError = toError(
