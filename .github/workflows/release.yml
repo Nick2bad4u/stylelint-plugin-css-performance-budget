@@ -352,10 +352,10 @@ jobs:
                   npm_error="temp/npm-view-error.txt"
                   if npm view "${PACKAGE_NAME}@${VERSION}" version --json > /dev/null 2> "$npm_error"; then
                     npm_published=true
-                    expected_npm_sha1=$(sha1sum "$EXPECTED_TARBALL_PATH" | cut -d' ' -f1)
-                    published_npm_sha1=$(npm view "${PACKAGE_NAME}@${VERSION}" dist.shasum)
-                    test "$published_npm_sha1" = "$expected_npm_sha1" || {
-                      echo "Published npm package ${PACKAGE_NAME}@${VERSION} has SHA-1 ${published_npm_sha1}, expected ${expected_npm_sha1}; refusing recovery." >&2
+                    expected_npm_integrity="sha512-$(openssl dgst -sha512 -binary "$EXPECTED_TARBALL_PATH" | openssl base64 -A)"
+                    published_npm_integrity=$(npm view "${PACKAGE_NAME}@${VERSION}" dist.integrity)
+                    test "$published_npm_integrity" = "$expected_npm_integrity" || {
+                      echo "Published npm package ${PACKAGE_NAME}@${VERSION} has integrity ${published_npm_integrity}, expected ${expected_npm_integrity}; refusing recovery." >&2
                       exit 1
                     }
                   elif grep --quiet 'E404' "$npm_error"; then
@@ -535,10 +535,10 @@ jobs:
                     echo "npm did not expose ${PACKAGE_NAME}@${VERSION} after 12 attempts." >&2
                     exit 1
                   }
-                  expected_npm_sha1=$(sha1sum "$EXPECTED_TARBALL_PATH" | cut -d' ' -f1)
-                  published_npm_sha1=$(npm view "${PACKAGE_NAME}@${VERSION}" dist.shasum)
-                  test "$published_npm_sha1" = "$expected_npm_sha1" || {
-                    echo "Published npm package has SHA-1 ${published_npm_sha1}, expected ${expected_npm_sha1}." >&2
+                  expected_npm_integrity="sha512-$(openssl dgst -sha512 -binary "$EXPECTED_TARBALL_PATH" | openssl base64 -A)"
+                  published_npm_integrity=$(npm view "${PACKAGE_NAME}@${VERSION}" dist.integrity)
+                  test "$published_npm_integrity" = "$expected_npm_integrity" || {
+                    echo "Published npm package has integrity ${published_npm_integrity}, expected ${expected_npm_integrity}." >&2
                     exit 1
                   }
                   release_json="temp/completed-github-release.json"
